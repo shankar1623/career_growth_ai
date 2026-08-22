@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
                 category: q.category || "General",
                 difficulty: q.difficulty || "Medium",
                 context: q.context || undefined,
-                idealAnswer: JSON.stringify(q.idealAnswerPoints || []),
+                idealAnswerPoints: JSON.stringify(q.idealAnswerPoints || []),
               })),
             },
           })),
