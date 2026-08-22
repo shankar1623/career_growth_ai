@@ -94,7 +94,7 @@ export function AnswerImprovementCard({
           <div className="p-3.5 rounded-xl bg-indigo-50/40 border border-indigo-100 space-y-1.5">
             <div className="flex items-center gap-1.5 text-indigo-900 font-bold">
               <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-              <span>Recommended STAR Structure Model Answer:</span>
+              <span>Recommended Model Answer:</span>
             </div>
             <div className="p-3 rounded-lg bg-white border border-indigo-200 text-slate-800 font-mono text-[11px] leading-relaxed whitespace-pre-wrap shadow-xs">
               {evaluation.improvedExample}

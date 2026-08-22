@@ -36,46 +36,46 @@ export function getRecommendedModelAnswer(questionText: string, roundType: strin
 
   // 1. Five Years / Career Goals
   if (qLower.includes("three to five years") || qLower.includes("5 years") || qLower.includes("where do you see yourself") || qLower.includes("career aspiration")) {
-    return `[Career Vision] In the next 3 to 5 years, I envision myself evolving from a strong individual contributor into a Senior Full-Stack Engineer and technical lead who architects scalable systems and mentors junior developers.\n\n[Skill Progression] Over the first 1-2 years, my priority is to deeply master your engineering ecosystem, drive high-velocity feature delivery, and optimize system reliability.\n\n[Long-Term Leadership] By years 3 to 5, I aim to lead critical architectural initiatives—such as scaling backend services, refining CI/CD pipelines, and contributing to technical roadmap decisions that drive company growth.`;
+    return `In the next 3 to 5 years, I envision myself growing from a strong individual contributor into a Senior Full-Stack Engineer who architects scalable systems and mentors junior engineers. Over the first 1 to 2 years, my priority is to deeply master your engineering stack, drive high-velocity feature delivery, and optimize system reliability. Longer term, I aim to lead critical architectural initiatives—such as scaling backend microservices, refining CI/CD pipelines, and contributing to technical roadmap decisions that drive product growth.`;
   }
 
   // 2. Self Introduction & Background
   if (qLower.includes("tell me about yourself") || qLower.includes("background in software") || qLower.includes("what drives you")) {
-    return `[Greeting & Background] Hello! I am a full-stack software engineer with a strong foundation in TypeScript, React, Next.js, and relational databases. Over the past few years, I have built production-ready web applications with an emphasis on performance and clean architecture.\n\n[Recent Impact] In my recent project, I architected a web platform with database indexing that cut query latency by 35% and supported high concurrent user activity.\n\n[Core Motivation] What drives me as an engineer is solving real-world challenges through elegant, maintainable code and collaborating within fast-paced Agile teams to deliver impactful products.`;
+    return `Hello! I am a software engineer with a strong background in TypeScript, React, Next.js, and relational databases. Over the past few years, I have built production web applications with an emphasis on high performance and clean architecture. In my recent project, I architected a web platform with database indexing that cut query latency by 35% and supported high concurrent user activity. What drives me as an engineer is solving real-world challenges through elegant, maintainable code and collaborating within fast-paced teams.`;
   }
 
   // 3. Motivation for Role & Challenges
   if (qLower.includes("interested in applying") || qLower.includes("technical challenges excite you")) {
-    return `[Role Motivation] I am excited about this role because your team tackles complex, high-impact problems at scale. Your commitment to code quality and modern engineering practices strongly aligns with my career goals.\n\n[Exciting Challenges] I am particularly drawn to challenges around system scalability, real-time data synchronization, and optimizing frontend-to-backend API latency to deliver frictionless user experiences.\n\n[Value Add] I look forward to bringing my proactive problem-solving mindset and continuous learning drive to immediately help advance your product milestones.`;
+    return `I am excited about this role because your team tackles complex, high-impact problems at scale. Your commitment to code quality and modern engineering practices strongly aligns with my career goals. I am particularly drawn to challenges around system scalability, real-time data synchronization, and optimizing frontend-to-backend API latency to deliver frictionless user experiences. I look forward to bringing my proactive problem-solving mindset and continuous learning drive to immediately help advance your product milestones.`;
   }
 
   // 4. Project Architecture & State Management
   if (qLower.includes("architecture of your most challenging project") || qLower.includes("most technically complex project")) {
-    return `[Situation & Problem] In my Career Intelligence Platform, the primary architectural challenge was coordinating real-time browser media streams, Web Speech API speech-to-text, and dynamic AI evaluation without latency bottlenecks.\n\n[Architecture] I structured the application using Next.js 16 App Router, TypeScript, and a decoupled AI Provider architecture that routes requests across multiple high-performance LLM engines with fallback.\n\n[State & Database] I managed client state reactively using custom hooks and implemented Neon PostgreSQL connection pooling with Prisma ORM.\n\n[Result] The application delivers sub-second response times and 100% Lighthouse accessibility ratings across desktop and mobile devices.`;
+    return `In my Career Intelligence Platform, the primary architectural challenge was coordinating real-time browser media streams, Web Speech API speech-to-text, and dynamic AI evaluation without latency bottlenecks. I structured the application using Next.js 16 App Router, TypeScript, and a decoupled AI Provider architecture that routes requests across multiple high-performance LLM engines with fallback. I managed client state reactively using custom hooks and implemented Neon PostgreSQL connection pooling with Prisma ORM. The application delivers sub-second response times and 100% Lighthouse accessibility ratings across desktop and mobile devices.`;
   }
 
   // 5. Difficult Bug / Performance Bottleneck
   if (qLower.includes("difficult technical bug") || qLower.includes("performance bottleneck") || qLower.includes("troubleshooting")) {
-    return `[Situation] During load testing of our primary dashboard endpoint, response times degraded from 300ms to over 2.8 seconds under concurrent traffic.\n\n[Diagnosis] I profiled the API using Chrome DevTools and executed EXPLAIN ANALYZE on our PostgreSQL queries, discovering a sequential table scan caused by an unindexed foreign key.\n\n[Action] I created a composite B-tree index on (user_id, created_at DESC) and restructured the ORM query to eliminate an N+1 fetching pattern.\n\n[Result] Average query execution dropped from 2,800ms to 38ms—a 98% latency reduction—eliminating database CPU spikes under load.`;
+    return `During load testing of our primary dashboard endpoint, response times degraded from 300ms to over 2.8 seconds under concurrent traffic. I profiled the API using Chrome DevTools and executed EXPLAIN ANALYZE on our PostgreSQL queries, discovering a sequential table scan caused by an unindexed foreign key. I created a composite B-tree index on (user_id, created_at DESC) and restructured the ORM query to eliminate an N+1 fetching pattern. As a result, average query execution dropped from 2,800ms to 38ms—a 98% latency reduction—eliminating database CPU spikes under load.`;
   }
 
   // 6. Asynchronous JavaScript & Event Loop
   if (qLower.includes("synchronous and asynchronous") || qLower.includes("event loop") || qLower.includes("microtask")) {
-    return `[Single-Threaded Model] JavaScript runs on a single thread with one Call Stack. Synchronous code executes line-by-line in a blocking manner, while asynchronous operations (I/O, fetch, timers) are offloaded to browser/Node.js Web APIs.\n\n[Queue Ordering] When an async task resolves, Promises and async/await callbacks queue into the high-priority Microtask Queue, whereas setTimeout and setInterval callbacks enter the Macrotask Queue (Task Queue).\n\n[Event Loop Cycle] The Event Loop continuously checks if the Call Stack is empty. Once empty, it executes ALL pending microtasks before picking the next macrotask, ensuring non-blocking performance.`;
+    return `JavaScript runs on a single thread with one Call Stack. Synchronous code executes line-by-line in a blocking manner, while asynchronous operations (I/O, fetch, timers) are offloaded to browser/Node.js Web APIs. When an async task resolves, Promises and async/await callbacks queue into the high-priority Microtask Queue, whereas setTimeout and setInterval callbacks enter the Macrotask Queue (Task Queue). The Event Loop continuously checks if the Call Stack is empty. Once empty, it executes ALL pending microtasks before picking the next macrotask, ensuring non-blocking performance.`;
   }
 
   // 7. RESTful API Design & Databases
   if (qLower.includes("restful api") || qLower.includes("api design") || qLower.includes("rate limiting")) {
-    return `[Resource Modeling] I design REST APIs following standard resource-oriented URLs with nouns (/api/v1/users/:id) and idempotent HTTP verbs (GET, PUT, DELETE, POST, PATCH).\n\n[Status Codes & Validation] I use precise status codes (200 OK, 201 Created, 400 Bad Request, 401 Unauthorized, 404 Not Found, 429 Too Many Requests) and validate all payloads with schema validation (Zod) before reaching controllers.\n\n[Performance & Security] I enforce database indexing with connection pooling, apply Redis sliding-window rate limiting (e.g. 100 req/min), and handle exceptions with centralized error middleware returning structured JSON.`;
+    return `I design REST APIs following standard resource-oriented URLs with nouns (/api/v1/users/:id) and idempotent HTTP verbs (GET, PUT, DELETE, POST, PATCH). I use precise status codes (200 OK, 201 Created, 400 Bad Request, 401 Unauthorized, 404 Not Found, 429 Too Many Requests) and validate all payloads with schema validation (Zod) before reaching controllers. I enforce database indexing with connection pooling, apply Redis sliding-window rate limiting (e.g. 100 req/min), and handle exceptions with centralized error middleware returning structured JSON.`;
   }
 
   // 8. Behavioral Deadline / Requirements Changed (STAR)
   if (qLower.includes("deadline") || qLower.includes("requirements changed") || qLower.includes("star method") || qLower.includes("roadblock")) {
-    return `[Situation] Two weeks before our quarterly release, stakeholders requested an urgent authentication workflow overhaul due to new security compliance requirements.\n\n[Task] As the lead feature engineer, I needed to integrate OAuth and role-based access control without pushing back our hard launch date.\n\n[Action] I organized an emergency triage session with the team, scoped out non-critical UI items into a future sprint, created mock API adapters, and automated regression tests.\n\n[Result] We successfully shipped on time with 100% test coverage, zero regression defects, and commended sprint velocity.`;
+    return `Two weeks before our quarterly release, stakeholders requested an urgent authentication workflow overhaul due to new security compliance requirements. As the lead feature engineer, I needed to integrate OAuth and role-based access control without pushing back our hard launch date. I organized an emergency triage session with the team, scoped out non-critical UI items into a future sprint, created mock API adapters, and automated regression tests. We successfully shipped on time with 100% test coverage, zero regression defects, and commended sprint velocity.`;
   }
 
-  // Default STAR Model Answer
-  return `[Situation] In my recent software project, our team faced a critical technical challenge that required careful architectural planning.\n\n[Task] I was tasked with diagnosing the root cause, designing a maintainable solution, and ensuring zero downtime for our active users.\n\n[Action] I systematically analyzed logs, collaborated with team members in Agile standups, wrote clean modular code with TypeScript and unit tests, and reviewed the PR with senior engineers.\n\n[Result] We successfully deployed the feature on schedule with improved performance metrics and positive user feedback.`;
+  // Default Model Answer
+  return `In my recent software project, our team faced a critical technical challenge that required careful architectural planning. I was tasked with diagnosing the root cause, designing a maintainable solution, and ensuring zero downtime for our active users. I systematically analyzed logs, collaborated with team members in Agile standups, wrote clean modular code with TypeScript and unit tests, and reviewed the PR with senior engineers. We successfully deployed the feature on schedule with improved performance metrics and positive user feedback.`;
 }
 
 // Smart heuristic engine analyzing resume text and generating detailed structured reports
@@ -666,7 +666,7 @@ export function evaluateSmartSpokenAnswer(
       relevanceScore: 0,
       fillerWordCount: 0,
       detectedFillerWords: [],
-      feedback: "Question was skipped without an answer. Review the recommended STAR structure below to practice this topic.",
+      feedback: "Question was skipped without an answer. Review the recommended model answer below to practice this topic.",
       strengths: [],
       weaknesses: ["No spoken answer was provided for this question."],
       improvedExample: modelAnswer,
@@ -956,7 +956,7 @@ export function generateSmartLearningRoadmap(
   ) || cleanGaps[2] || "Database Indexing & Query Optimization";
 
   // Week 4 Skill
-  const week4Skill = "System Design, STAR Behavioral & Live Coding Mastery";
+  const week4Skill = "System Design, Behavioral Communication & Live Coding Mastery";
 
   return {
     title: `4-Week Master Roadmap for ${targetRole}`,
@@ -1040,19 +1040,19 @@ export function generateSmartLearningRoadmap(
         currentLevel: "Intermediate",
         targetLevel: "Advanced",
         topics: [
-          "Structuring technical answers with the STAR method (Situation, Task, Action, Result)",
+          "Structuring technical answers clearly with context, key actions, and measurable results",
           "Eliminating filler words through intentional pausing techniques",
           "System design fundamentals (Load Balancing, Caching, Sharding)",
           "Timed live algorithmic coding and edge case validation",
         ],
         practiceTasks: [
           "Record 3 full video mock interview sessions on CareerGrowth AI",
-          "Write out 5 STAR stories from past projects with measurable business metrics",
+          "Prepare 5 project experience stories with measurable business metrics",
           "Practice 5 LeetCode medium algorithmic challenges under a 20-minute timer",
         ],
         resources: [
           { title: "System Design Primer by Donne Martin", url: "https://github.com/donnemartin/system-design-primer", type: "Practice" },
-          { title: "STAR Method Behavioral Interview Guide", url: "https://careergrowth.ai", type: "Practice" },
+          { title: "Interview Communication & Practice Guide", url: "https://careergrowth.ai", type: "Practice" },
         ],
         isCompleted: false,
       },

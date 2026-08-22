@@ -36,10 +36,10 @@ export async function POST(req: NextRequest) {
         relevanceScore: 0,
         fillerWordCount: 0,
         detectedFillerWords: [],
-        feedback: "Question was skipped without an answer. Review the recommended STAR answer structure below to practice this topic.",
+        feedback: "Question was skipped without an answer. Review the recommended model answer below to practice this topic.",
         strengths: [],
         weaknesses: ["No response was provided for this question."],
-        improvedExample: `[Situation] In my recent project, we encountered a critical requirement change right before sprint release.\n[Task] I needed to adapt our data model and API endpoints without delaying the release date.\n[Action] I prioritized core deliverables, automated regression tests, and communicated transparently with team members.\n[Result] We successfully shipped on time with zero production defects.`,
+        improvedExample: `In my recent project, we encountered a critical requirement change right before sprint release. I adapted our data model and API endpoints without delaying the release by prioritizing core deliverables, automating regression tests, and communicating transparently with the team. As a result, we shipped on time with zero production defects.`,
         starAnalysis: {
           situation: "Set context clearly at the start of your answer.",
           task: "Define the specific challenge or technical goal you owned.",
