@@ -478,49 +478,92 @@ Beyond writing code, what I value most is being part of a collaborative, high-tr
   };
 }
 
-// Smart 5-Round Interview Questions Generator
+// Smart 5-Round Interview Questions Generator tailored to Role, Seniority, and Resume
 export function generateSmartInterviewQuestions(
-  role: string = "Software Engineer",
+  role: string = "Full-Stack Software Engineer",
+  experienceLevel: string = "Entry / Mid Level",
   resumeText: string = "",
   jdText: string = ""
 ): InterviewRoundData[] {
   const rLower = resumeText.toLowerCase();
+  const roleLower = role.toLowerCase();
+
+  // Extract detected technologies from resume
+  const knownTech = [
+    "react", "next.js", "typescript", "javascript", "node.js", "express",
+    "python", "django", "fastapi", "postgresql", "mongodb", "mysql",
+    "redis", "docker", "kubernetes", "aws", "tailwind", "graphql", "sql"
+  ];
+  const detectedTech = knownTech.filter((t) => rLower.includes(t));
+  const topTechString = detectedTech.length > 0
+    ? detectedTech.slice(0, 3).map(t => t.charAt(0).toUpperCase() + t.slice(1)).join(", ")
+    : null;
+
+  // Detect primary domain
+  const isFrontend = roleLower.includes("frontend") || roleLower.includes("react") || roleLower.includes("ui");
+  const isBackend = roleLower.includes("backend") || roleLower.includes("node") || roleLower.includes("sql") || roleLower.includes("java");
+  const isData = roleLower.includes("data") || roleLower.includes("python") || roleLower.includes("ml") || roleLower.includes("ai");
+  const isDevOps = roleLower.includes("devops") || roleLower.includes("cloud") || roleLower.includes("aws") || roleLower.includes("infra");
 
   // Round 1: Self Introduction
   const round1: InterviewRoundData = {
     roundNumber: 1,
     roundType: "SELF_INTRO",
     title: "Round 1: Self Introduction & Background",
-    description: "Introduce yourself, explain your technical journey, and highlight your core motivations.",
+    description: `Introduce yourself, articulate your technical journey, and highlight your background for this ${role} position.`,
     status: "PENDING",
     questions: [
       {
         orderIndex: 1,
-        questionText: `Hi, welcome to your mock interview! Let's get started. Tell me about yourself, your background in software development, and what drives you as an engineer.`,
+        questionText: `Welcome to your ${role} interview! Let's begin. Could you please introduce yourself, walk me through your technical background, and share what drives you as an engineer?`,
         category: "Self Introduction",
         difficulty: "Easy",
         idealAnswerPoints: [
-          "Concise background summary (1-2 minutes)",
-          "Primary tech stack & engineering passions",
-          "Recent impactful projects or experiences",
-          "Motivation for the role",
+          "Concise, structured background summary (1-2 minutes)",
+          `Primary tech stack & domain passion (${topTechString || role})`,
+          "Recent impactful project accomplishments",
+          "Clear enthusiasm for the role",
         ],
       },
       {
         orderIndex: 2,
-        questionText: `What made you interested in applying for this ${role} position, and what kind of technical challenges excite you most?`,
-        category: "Motivation & Fit",
+        questionText: `What specifically motivated you to apply for this ${role} role (${experienceLevel}), and what type of engineering challenges excite you most?`,
+        category: "Role Motivation & Fit",
         difficulty: "Easy",
         idealAnswerPoints: [
-          "Understanding of the role and technical challenges",
-          "Specific technologies or problem domains of interest",
-          "Eagerness for growth and team collaboration",
+          "Understanding of the core engineering responsibilities",
+          "Interest in solving domain-specific scalability or product problems",
+          "Alignment with team collaboration and continuous learning",
         ],
       },
     ],
   };
 
   // Round 2: Resume Deep-Dive
+  let r2q1Text = "";
+  let r2q1Category = "Project Architecture";
+  let r2q2Text = "";
+
+  if (topTechString) {
+    r2q1Text = `In your resume, you highlighted working with ${topTechString}. Can you walk me through the architecture of your most challenging project, explaining how you structured the components, data models, and API integrations?`;
+    r2q2Text = `Looking back at that project built with ${detectedTech[0] ? detectedTech[0].toUpperCase() : "your tech stack"}, what was the most difficult production bug, state synchronization issue, or performance bottleneck you diagnosed, and how did you resolve it?`;
+  } else if (isFrontend) {
+    r2q1Text = `Can you walk me through the architecture of a complex web application you've built? How did you design the component hierarchy, manage client state, and optimize rendering performance?`;
+    r2q2Text = `Describe a challenging frontend performance issue or responsive layout bug you tackled. What browser profiling tools did you use to identify and resolve the bottleneck?`;
+  } else if (isBackend) {
+    r2q1Text = `Walk me through the backend architecture of a high-throughput service or API you engineered. How did you design the database schemas, handle authentication, and structure endpoints?`;
+    r2q2Text = `Tell me about a time you diagnosed a severe database query slowdown, deadlock, or API timeout under high load. What was the root cause and how did you resolve it?`;
+  } else if (isData) {
+    r2q1Text = `Can you walk me through a data pipeline or analytics workflow you developed? How did you approach data ingestion, schema validation, and pipeline reliability?`;
+    r2q2Text = `Describe a complex data transformation or memory efficiency challenge you encountered in Python. How did you optimize processing times and memory footprint?`;
+  } else if (isDevOps) {
+    r2q1Text = `Walk me through a production CI/CD deployment pipeline or cloud infrastructure you designed. What tools did you use for automated testing, containerization, and release management?`;
+    r2q2Text = `Describe an unexpected production outage or deployment rollback scenario you resolved. How did you diagnose the issue and what safeguards did you put in place?`;
+  } else {
+    r2q1Text = `Walk me through the most technically complex project listed on your resume. What was the core problem, what was your role, and what architectural decisions did you make?`;
+    r2q2Text = `Describe a difficult technical bug or performance bottleneck you encountered in one of your projects. How did you diagnose it, what tools did you use, and how did you resolve it?`;
+  }
+
   const round2: InterviewRoundData = {
     roundNumber: 2,
     roundType: "RESUME_DEEP_DIVE",
@@ -530,64 +573,163 @@ export function generateSmartInterviewQuestions(
     questions: [
       {
         orderIndex: 1,
-        questionText: rLower.includes("react") || rLower.includes("frontend")
-          ? `In your resume, you highlighted building web applications. Can you walk me through the architecture of your most challenging project, and explain how you structured state management and component reusability?`
-          : `Walk me through the most technically complex project listed on your resume. What was the core problem, what was your role, and what architectural decisions did you make?`,
-        category: "Project Architecture",
+        questionText: r2q1Text,
+        category: r2q1Category,
         difficulty: "Medium",
         idealAnswerPoints: [
-          "Clear problem statement and user requirements",
-          "Component / service architecture diagram explanation",
-          "State management or database schema strategy",
-          "Trade-offs considered during development",
+          "Clear problem statement and technical requirements",
+          "Component / service architecture explanation",
+          "Trade-offs between different frameworks or database choices",
+          "Measurable impact on end users or system performance",
         ],
       },
       {
         orderIndex: 2,
-        questionText: `Describe a difficult technical bug or performance bottleneck you encountered in one of your projects. How did you diagnose it, what tools did you use, and how did you resolve it?`,
-        category: "Troubleshooting & Debugging",
+        questionText: r2q2Text,
+        category: "Debugging & Troubleshooting",
         difficulty: "Medium",
         idealAnswerPoints: [
-          "Systematic debugging methodology (profilers, logs, network inspector)",
+          "Systematic debugging methodology (logs, profilers, network inspector)",
           "Root cause discovery",
           "Permanent fix implementation",
-          "Prevention of regression (tests/monitoring)",
+          "Prevention of regressions through automated tests or monitoring",
         ],
       },
     ],
   };
 
-  // Round 3: Technical Round
+  // Round 3: Technical Round (Tailored to Role)
+  let r3q1: { text: string; category: string; points: string[] };
+  let r3q2: { text: string; category: string; points: string[] };
+
+  if (isFrontend) {
+    r3q1 = {
+      text: `Can you explain React's rendering lifecycle, the Virtual DOM reconciliation algorithm (Fiber), and how React 19 Server Components differ from traditional Client Components in terms of bundle size and data fetching?`,
+      category: "React Architecture & Reconciliation",
+      points: [
+        "Reconciliation algorithm and key prop purpose in lists",
+        "Server Components execute on server with zero bundle impact",
+        "Client Components for interactivity and browser hooks",
+        "Practical performance trade-offs (Hydration vs SSR)",
+      ],
+    };
+    r3q2 = {
+      text: `How do you diagnose and optimize Core Web Vitals (Largest Contentful Paint, Interaction to Next Paint, Cumulative Layout Shift) on a high-traffic web application?`,
+      category: "Frontend Web Performance",
+      points: [
+        "LCP optimizations: Image preloading, critical CSS, CDN delivery",
+        "INP optimizations: Debouncing, web workers, yielding to main thread",
+        "CLS optimizations: Explicit image dimensions, font display swap",
+        "Code-splitting with dynamic imports",
+      ],
+    };
+  } else if (isBackend) {
+    r3q1 = {
+      text: `Can you explain how relational database indexing (B-trees) works under the hood, how compound indexes are scanned, and how you would diagnose an unindexed slow query in PostgreSQL or MySQL?`,
+      category: "Database Indexing & Query Tuning",
+      points: [
+        "B-tree index structure and O(log N) lookup complexity",
+        "Left-most prefix rule for compound indexes",
+        "Using EXPLAIN ANALYZE to identify sequential table scans",
+        "Trade-offs of index write overhead on INSERT/UPDATE",
+      ],
+    };
+    r3q2 = {
+      text: `How do you design an idempotent RESTful API payment or checkout endpoint that guarantees zero duplicate charges even under network retries and high concurrency?`,
+      category: "Distributed Systems & Idempotency",
+      points: [
+        "Idempotency keys stored in Redis or database with TTL",
+        "Database transactions (ACID) with row-level locking or optimistic locking",
+        "Proper HTTP status codes (200, 201, 409 Conflict)",
+        "Dead-letter queues and atomic operations",
+      ],
+    };
+  } else if (isData) {
+    r3q1 = {
+      text: `In Python, can you explain the performance difference between vectorized operations in NumPy/Pandas versus native Python for-loops? How does memory allocation and the Global Interpreter Lock (GIL) play into this?`,
+      category: "Python Vectorization & Memory",
+      points: [
+        "C-level continuous memory buffers in NumPy arrays",
+        "Vectorized SIMD instruction execution without Python bytecode overhead",
+        "GIL impact on CPU-bound multi-threading vs multiprocessing",
+        "Generator iterators for streaming large datasets without memory blowup",
+      ],
+    };
+    r3q2 = {
+      text: `How would you architect a fault-tolerant ETL pipeline that processes millions of incoming events daily, handles schema drift, and ensures exactly-once or at-least-once delivery?`,
+      category: "Data Pipelines & Streaming",
+      points: [
+        "Message broker buffering (Kafka/RabbitMQ)",
+        "Staging tables and schema validation",
+        "Idempotent data sink loading and deduplication",
+        "Monitoring, alerting, and automated backfill retries",
+      ],
+    };
+  } else if (isDevOps) {
+    r3q1 = {
+      text: `Can you explain the key architectural differences between Docker containers and virtual machines? How do Linux cgroups, namespaces, and union file systems isolate processes?`,
+      category: "Containerization & Linux Internals",
+      points: [
+        "Shared host kernel vs hypervisor virtualization layer",
+        "cgroups for resource limits (CPU/Memory) and namespaces for isolation",
+        "Multi-stage Docker builds to minimize attack surface and image size",
+        "Non-root container security best practices",
+      ],
+    };
+    r3q2 = {
+      text: `How do you implement a zero-downtime Blue-Green or Canary deployment strategy in Kubernetes or AWS, including automated health checks, metric rollback gates, and database schema migrations?`,
+      category: "CI/CD & Cloud Deployments",
+      points: [
+        "Traffic shifting via Ingress / Load Balancer routing",
+        "Readiness and Liveness probes for container health",
+        "Automated rollback triggered by error rate thresholds",
+        "Backward-compatible database schema migrations (Expand and Contract pattern)",
+      ],
+    };
+  } else {
+    // Full-Stack Default
+    r3q1 = {
+      text: `Can you explain the difference between synchronous and asynchronous execution in Node.js/JavaScript? How does the Event Loop, Microtask Queue, and Macrotask Queue handle Promises versus setTimeout?`,
+      category: "Asynchronous Concurrency & Event Loop",
+      points: [
+        "Call stack and single-threaded execution model",
+        "Event loop tick cycle and Libuv thread pool",
+        "Promise resolution in Microtask queue before next Macrotask",
+        "Handling unhandled rejections and async/await error propagation",
+      ],
+    };
+    r3q2 = {
+      text: `How do you design a secure, production-ready RESTful API with JWT authentication, role-based access control, database indexing, rate limiting, and structured error handling?`,
+      category: "API Architecture & Security",
+      points: [
+        "Stateless JWT token verification with refresh token rotation",
+        "Input validation and sanitization (Zod/Joi)",
+        "Database indexing to avoid full-table scans",
+        "Rate limiting middleware (Token Bucket in Redis) and standard HTTP status codes",
+      ],
+    };
+  }
+
   const round3: InterviewRoundData = {
     roundNumber: 3,
     roundType: "TECHNICAL",
-    title: "Round 3: Core Technical & System Concepts",
-    description: "Evaluating your grasp of core programming principles, asynchronous execution, databases, and APIs.",
+    title: `Round 3: Core ${role} Technical & Architecture`,
+    description: `Evaluating your depth in ${role} principles, system design, and production engineering.`,
     status: "PENDING",
     questions: [
       {
         orderIndex: 1,
-        questionText: `Can you explain the difference between synchronous and asynchronous execution in JavaScript? How does the Event Loop, Microtask Queue, and Macrotask Queue handle Promises versus setTimeout?`,
-        category: "JavaScript & Concurrency",
+        questionText: r3q1.text,
+        category: r3q1.category,
         difficulty: "Medium",
-        idealAnswerPoints: [
-          "Call stack and single-threaded execution model",
-          "Event loop tick cycle",
-          "Promise resolution in Microtask queue before next Macrotask",
-          "Practical example with async/await error handling",
-        ],
+        idealAnswerPoints: r3q1.points,
       },
       {
         orderIndex: 2,
-        questionText: `How do you design a robust RESTful API with proper HTTP status codes, error handling, rate limiting, and database indexing for high query throughput?`,
-        category: "API Design & Databases",
+        questionText: r3q2.text,
+        category: r3q2.category,
         difficulty: "Hard",
-        idealAnswerPoints: [
-          "REST conventions (GET, POST, PUT, DELETE, PATCH) and idempotent verbs",
-          "Proper status codes (200, 201, 400, 401, 404, 429, 500)",
-          "Database index types (B-tree) and avoiding N+1 query problems",
-          "Authentication / token verification layer",
-        ],
+        idealAnswerPoints: r3q2.points,
       },
     ],
   };
@@ -622,7 +764,7 @@ export function generateSmartInterviewQuestions(
     questions: [
       {
         orderIndex: 1,
-        questionText: `Tell me about a time when you were working on a project with a tight deadline and requirements changed midway or you faced an unexpected technical roadblock. How did you handle the situation using the STAR method?`,
+        questionText: `Tell me about a time when you were working on a critical feature under a tight deadline and requirements changed midway or you faced an unexpected technical roadblock. How did you handle the situation and deliver?`,
         category: "STAR Behavioral - Adaptability",
         difficulty: "Medium",
         idealAnswerPoints: [
@@ -634,13 +776,13 @@ export function generateSmartInterviewQuestions(
       },
       {
         orderIndex: 2,
-        questionText: `Where do you see yourself in three to five years, and how does this role fit into your long-term career aspirations?`,
-        category: "HR - Career Goals & Growth",
+        questionText: `Describe a situation where you had a technical disagreement with a teammate or received critical code review feedback on a pull request. How did you approach the discussion and reach a resolution?`,
+        category: "STAR Behavioral - Collaboration",
         difficulty: "Easy",
         idealAnswerPoints: [
-          "Desire to deepen technical domain expertise",
-          "Mentorship and taking architectural ownership",
-          "Alignment with team and company mission",
+          "Open, objective mindset toward constructive criticism",
+          "Evaluating trade-offs with data and code readability benchmarks",
+          "Maintaining positive team trust and alignment",
         ],
       },
     ],

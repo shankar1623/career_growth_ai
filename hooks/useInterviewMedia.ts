@@ -28,6 +28,9 @@ export function useInterviewMedia(options: UseInterviewMediaOptions = {}) {
   const streamRef = useRef<MediaStream | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const recognitionRef = useRef<any>(null);
+  const isListeningRef = useRef(false);
+  const isAiSpeakingRef = useRef(false);
+  const liveTranscriptRef = useRef("");
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const onSilenceTimeoutRef = useRef(onSilenceTimeout);
@@ -36,6 +39,10 @@ export function useInterviewMedia(options: UseInterviewMediaOptions = {}) {
     onSilenceTimeoutRef.current = onSilenceTimeout;
   }, [onSilenceTimeout]);
 
+  useEffect(() => {
+    liveTranscriptRef.current = liveTranscript;
+  }, [liveTranscript]);
+
   // Reset Silence Timers
   const resetSilenceDetection = useCallback(() => {
     if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
@@ -43,8 +50,8 @@ export function useInterviewMedia(options: UseInterviewMediaOptions = {}) {
     setSilenceCountdown(null);
   }, []);
 
-  // Trigger 5-second silence countdown to auto-advance to next question
-  const startSilenceCountdown = useCallback((duration: number = 5) => {
+  // Trigger silence countdown after user has finished speaking and paused for a long duration
+  const startSilenceCountdown = useCallback((duration: number = 8) => {
     if (!enableSilenceDetection) return;
     if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
     if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
@@ -139,6 +146,9 @@ export function useInterviewMedia(options: UseInterviewMediaOptions = {}) {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recognition.onresult = (event: any) => {
+      // If AI is speaking, ignore speech recognition to prevent loop
+      if (isAiSpeakingRef.current) return;
+
       let finalStr = "";
       let interimStr = "";
 
@@ -151,24 +161,39 @@ export function useInterviewMedia(options: UseInterviewMediaOptions = {}) {
       }
 
       const fullText = (finalStr + interimStr).trim();
-      setLiveTranscript(fullText);
-      if (onTranscriptUpdate) onTranscriptUpdate(fullText);
+      if (fullText) {
+        setLiveTranscript(fullText);
+        if (onTranscriptUpdate) onTranscriptUpdate(fullText);
 
-      // User is actively speaking -> cancel countdown
-      setIsUserSpeaking(true);
-      resetSilenceDetection();
+        // User is actively speaking
+        setIsUserSpeaking(true);
+        resetSilenceDetection();
 
-      // Start 5-second silence countdown after user stops speaking (pause for 2.5s)
-      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-      silenceTimerRef.current = setTimeout(() => {
-        setIsUserSpeaking(false);
-        startSilenceCountdown(5);
-      }, 2500);
+        // Only start a generous silence countdown if user has provided a meaningful answer (> 20 chars) and paused for 7s
+        if (fullText.length > 20) {
+          if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+          silenceTimerRef.current = setTimeout(() => {
+            setIsUserSpeaking(false);
+            startSilenceCountdown(8);
+          }, 7000);
+        }
+      }
+    };
+
+    // Auto-restart recognition if it stops unexpectedly while listening is desired
+    recognition.onend = () => {
+      if (isListeningRef.current && !isAiSpeakingRef.current) {
+        try {
+          recognition.start();
+        } catch {}
+      }
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recognition.onerror = (e: any) => {
-      console.warn("Speech recognition notice:", e.error);
+      if (e.error !== "no-speech") {
+        console.warn("Speech recognition note:", e.error);
+      }
     };
 
     recognitionRef.current = recognition;
@@ -181,31 +206,30 @@ export function useInterviewMedia(options: UseInterviewMediaOptions = {}) {
     };
   }, [onTranscriptUpdate, resetSilenceDetection, startSilenceCountdown]);
 
-  // Start Listening and trigger 5s countdown if user stays completely silent
+  // Start Listening without aggressive premature timeouts
   const startListening = useCallback(() => {
     resetSilenceDetection();
-    if (recognitionRef.current && isMicOn) {
+    isListeningRef.current = true;
+    setIsListening(true);
+
+    if (recognitionRef.current && isMicOn && !isAiSpeakingRef.current) {
       try {
-        setLiveTranscript("");
         recognitionRef.current.start();
-        setIsListening(true);
-      } catch (err) {
-        console.warn("Recognition already started or error:", err);
+      } catch {
+        // Recognition might already be running
       }
     }
-    // Start 5-second auto-advance countdown if user doesn't speak at all
-    if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-    silenceTimerRef.current = setTimeout(() => {
-      startSilenceCountdown(5);
-    }, 5000);
-  }, [isMicOn, resetSilenceDetection, startSilenceCountdown]);
+  }, [isMicOn, resetSilenceDetection]);
 
   // Stop Listening
   const stopListening = useCallback(() => {
+    isListeningRef.current = false;
+    setIsListening(false);
+    setIsUserSpeaking(false);
+
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
-        setIsListening(false);
       } catch {}
     }
     resetSilenceDetection();
@@ -224,12 +248,16 @@ export function useInterviewMedia(options: UseInterviewMediaOptions = {}) {
       stopListening();
 
       if (!isAiVoiceOn) {
+        setIsAiSpeaking(false);
+        isAiSpeakingRef.current = false;
         if (onComplete) onComplete();
         startListening();
         return;
       }
 
       setIsAiSpeaking(true);
+      isAiSpeakingRef.current = true;
+
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 1.0;
       utterance.pitch = 1.0;
@@ -238,21 +266,25 @@ export function useInterviewMedia(options: UseInterviewMediaOptions = {}) {
       // Select natural voice if available
       const voices = window.speechSynthesis.getVoices();
       const preferredVoice = voices.find(
-        (v) => v.lang.includes("en") && (v.name.includes("Natural") || v.name.includes("Google") || v.name.includes("Samantha"))
+        (v) =>
+          v.lang.includes("en") &&
+          (v.name.includes("Natural") ||
+            v.name.includes("Google") ||
+            v.name.includes("Samantha") ||
+            v.name.includes("Daniel"))
       );
       if (preferredVoice) utterance.voice = preferredVoice;
 
-      utterance.onend = () => {
+      const finishSpeech = () => {
         setIsAiSpeaking(false);
+        isAiSpeakingRef.current = false;
         if (onComplete) onComplete();
+        // Immediately start listening when AI finishes speaking the question
         startListening();
       };
 
-      utterance.onerror = () => {
-        setIsAiSpeaking(false);
-        if (onComplete) onComplete();
-        startListening();
-      };
+      utterance.onend = finishSpeech;
+      utterance.onerror = finishSpeech;
 
       window.speechSynthesis.speak(utterance);
     },

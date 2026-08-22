@@ -45,8 +45,8 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Generate 5 structured interview rounds tailored to Resume + JD with Groq AI
-    const roundsData = await generateInterviewQuestions(role, resumeText, jdText);
+    // Generate 5 structured interview rounds tailored to Role, Seniority, Resume + JD
+    const roundsData = await generateInterviewQuestions(role, experienceLevel, resumeText, jdText);
 
     // Create Interview session in DB
     const interview = await prisma.interview.create({

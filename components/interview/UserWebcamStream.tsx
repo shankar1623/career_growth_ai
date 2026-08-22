@@ -1,7 +1,7 @@
 "use client";
 
 import { RefObject, useEffect } from "react";
-import { CameraOff, Mic, MicOff } from "lucide-react";
+import { CameraOff, Mic, MicOff, Sparkles } from "lucide-react";
 
 interface UserWebcamStreamProps {
   videoRef: RefObject<HTMLVideoElement | null>;
@@ -29,7 +29,7 @@ export function UserWebcamStream({
   }, [videoRef, mediaStream]);
 
   return (
-    <div className="relative aspect-video w-full rounded-2xl bg-slate-900 overflow-hidden border border-slate-200 shadow-md flex items-center justify-center">
+    <div className="relative aspect-video w-full rounded-3xl bg-slate-950 overflow-hidden border border-slate-200/90 dark:border-slate-800 shadow-xs flex items-center justify-center transition-colors">
       {/* Live Video Feed (Mirrored) */}
       <video
         ref={videoRef}
@@ -44,43 +44,52 @@ export function UserWebcamStream({
 
       {/* Camera Off Placeholder */}
       {!isCameraOn && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-800 text-slate-300">
-          <div className="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center mb-2">
-            <CameraOff className="w-8 h-8 text-slate-400" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900 text-slate-400">
+          <div className="w-16 h-16 rounded-2xl bg-slate-800 flex items-center justify-center mb-2">
+            <CameraOff className="w-8 h-8 text-slate-500" />
           </div>
-          <span className="text-xs font-semibold">Camera is Turned Off</span>
+          <span className="text-xs font-bold text-slate-300">Camera is Turned Off</span>
         </div>
       )}
 
       {/* Top Left: Candidate Badge */}
-      <div className="absolute top-3 left-3 z-10 flex items-center gap-2 bg-slate-900/80 backdrop-blur-md px-2.5 py-1 rounded-full border border-slate-700/60 text-white text-[11px] font-semibold">
-        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-        <span>Your Camera (Live)</span>
+      <div className="absolute top-3.5 left-3.5 z-10 flex items-center gap-2 bg-slate-950/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-800/80 text-white text-[11px] font-bold shadow-xs">
+        <span className={`w-2 h-2 rounded-full ${isCameraOn ? "bg-emerald-400 animate-pulse" : "bg-slate-500"}`} />
+        <span>Candidate Video (You)</span>
       </div>
 
       {/* Top Right: Mic Status */}
-      <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md px-2 py-1 rounded-full border border-slate-700/60 text-white text-[11px]">
+      <div className="absolute top-3.5 right-3.5 z-10 flex items-center gap-1.5 bg-slate-950/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-800/80 text-white text-[11px] shadow-xs">
         {isMicOn ? (
-          <div className="flex items-center gap-1 text-emerald-400">
+          <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
             <Mic className="w-3.5 h-3.5" />
-            {isUserSpeaking && (
+            {isUserSpeaking ? (
               <div className="flex items-center gap-0.5 h-3">
                 <span className="w-0.5 bg-emerald-400 h-2 animate-voice-bar-1 rounded-full" />
                 <span className="w-0.5 bg-emerald-400 h-3 animate-voice-bar-2 rounded-full" />
                 <span className="w-0.5 bg-emerald-400 h-1.5 animate-voice-bar-3 rounded-full" />
               </div>
+            ) : (
+              <span>Mic Ready</span>
             )}
           </div>
         ) : (
-          <MicOff className="w-3.5 h-3.5 text-rose-400" />
+          <div className="flex items-center gap-1 text-rose-400 font-semibold">
+            <MicOff className="w-3.5 h-3.5" />
+            <span>Muted</span>
+          </div>
         )}
       </div>
 
       {/* Bottom Subtitle / Live Transcript Overlay */}
-      {liveTranscript && (
-        <div className="absolute bottom-3 left-3 right-3 z-10 bg-slate-900/85 backdrop-blur-md p-2.5 rounded-xl border border-slate-700/70 text-slate-100 text-xs leading-relaxed max-h-16 overflow-y-auto">
-          <span className="text-indigo-300 font-semibold mr-1.5">You:</span>
+      {liveTranscript ? (
+        <div className="absolute bottom-3.5 left-3.5 right-3.5 z-10 bg-slate-950/90 backdrop-blur-md p-3 rounded-2xl border border-slate-800 text-slate-100 text-xs leading-relaxed max-h-20 overflow-y-auto animate-in fade-in">
+          <span className="text-indigo-400 font-bold mr-1.5">You:</span>
           <span>{liveTranscript}</span>
+        </div>
+      ) : (
+        <div className="absolute bottom-3.5 left-3.5 right-3.5 z-10 bg-slate-950/60 backdrop-blur-xs p-2 rounded-xl border border-slate-800/50 text-slate-400 text-[11px] text-center">
+          <span>Speak clearly into your microphone when ready</span>
         </div>
       )}
     </div>

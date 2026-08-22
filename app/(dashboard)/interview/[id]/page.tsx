@@ -1,12 +1,16 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   Video,
   Loader2,
   AlertCircle,
   Play,
+  Mic,
+  Sparkles,
+  ArrowRight,
+  ShieldCheck,
 } from "lucide-react";
 import { useInterviewMedia } from "@/hooks/useInterviewMedia";
 import { UserWebcamStream } from "@/components/interview/UserWebcamStream";
@@ -15,7 +19,6 @@ import { SilenceDetector } from "@/components/interview/SilenceDetector";
 import { InterviewControlsBar } from "@/components/interview/InterviewControlsBar";
 import { SpeechFallbackModal } from "@/components/interview/SpeechFallbackModal";
 import { MonacoCodingRound } from "@/components/interview/MonacoCodingRound";
-import { InterviewRoundData } from "@/types";
 
 interface SessionQuestion {
   id: string;
@@ -56,6 +59,8 @@ export default function LiveInterviewRoomPage() {
   const [isTextModalOpen, setIsTextModalOpen] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
 
+  const spokenQuestionIdRef = useRef<string | null>(null);
+
   // Custom Media Hook
   const {
     videoRef,
@@ -76,10 +81,11 @@ export default function LiveInterviewRoomPage() {
     resetSilenceDetection,
     speakQuestion,
     stopListening,
+    startListening,
   } = useInterviewMedia({
     enableSilenceDetection: true,
     onSilenceTimeout: () => {
-      // Auto move after 10-sec silence
+      // Auto advance only after long pause
       handleSubmitAnswer();
     },
   });
@@ -110,12 +116,16 @@ export default function LiveInterviewRoomPage() {
   const currentQuestion = currentRound?.questions[currentQuestionIdx];
   const isCodingRound = currentRound?.roundType === "CODING";
 
-  // Trigger AI Voice when moving to a new question
+  // Trigger AI Voice exactly once per question
   useEffect(() => {
     if (hasStarted && currentQuestion && !isCodingRound) {
-      speakQuestion(currentQuestion.questionText);
+      if (spokenQuestionIdRef.current !== currentQuestion.id) {
+        spokenQuestionIdRef.current = currentQuestion.id;
+        setLiveTranscript("");
+        speakQuestion(currentQuestion.questionText);
+      }
     }
-  }, [hasStarted, currentRoundIdx, currentQuestionIdx, currentQuestion, isCodingRound, speakQuestion]);
+  }, [hasStarted, currentQuestion, isCodingRound, speakQuestion, setLiveTranscript]);
 
   // Request permissions & Start Interview
   const handleStartSession = async () => {
@@ -187,19 +197,19 @@ export default function LiveInterviewRoomPage() {
 
   if (isLoadingSession) {
     return (
-      <div className="py-20 flex flex-col items-center justify-center space-y-3">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-        <span className="text-xs font-semibold text-slate-500">Preparing Interview Room...</span>
+      <div className="py-24 flex flex-col items-center justify-center space-y-3">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
+        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Preparing Interview Room...</span>
       </div>
     );
   }
 
   if (sessionError || !session) {
     return (
-      <div className="p-6 bg-rose-50 border border-rose-200 rounded-2xl max-w-lg mx-auto text-center space-y-3">
-        <AlertCircle className="w-8 h-8 text-rose-600 mx-auto" />
-        <h3 className="text-base font-bold text-rose-900">Unable to Start Session</h3>
-        <p className="text-xs text-rose-700">{sessionError || "Session not found."}</p>
+      <div className="p-6 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-3xl max-w-lg mx-auto text-center space-y-3">
+        <AlertCircle className="w-8 h-8 text-rose-600 dark:text-rose-400 mx-auto" />
+        <h3 className="text-base font-bold text-rose-900 dark:text-rose-200">Unable to Start Session</h3>
+        <p className="text-xs text-rose-700 dark:text-rose-300">{sessionError || "Session not found."}</p>
       </div>
     );
   }
@@ -208,43 +218,47 @@ export default function LiveInterviewRoomPage() {
   if (!hasStarted) {
     return (
       <div className="max-w-xl mx-auto py-10">
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-8 text-center space-y-6">
-          <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto shadow-inner">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xs p-8 text-center space-y-6 transition-colors">
+          <div className="w-16 h-16 rounded-3xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto shadow-xs">
             <Video className="w-8 h-8" />
           </div>
 
           <div>
-            <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">
-              {session.jobTitle} Live Mock Interview
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 text-xs font-semibold mb-2">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>5-Round Live Simulation</span>
+            </div>
+            <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+              {session.jobTitle} Mock Interview
             </h2>
-            <p className="text-xs text-slate-500 mt-1">
-              5 comprehensive rounds (Self-Intro, Resume, Tech, Monaco Coding, HR)
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Self-Intro • Resume Deep-Dive • Core Tech • Monaco Coding • Behavioral HR
             </p>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-left text-xs space-y-2 text-slate-600">
-            <div className="font-bold text-slate-800">Before you begin:</div>
-            <ul className="space-y-1.5 list-disc pl-4 text-slate-600">
-              <li>Ensure your webcam and microphone permissions are enabled.</li>
-              <li>Your voice will be transcribed in real time.</li>
-              <li>A 10-second pause detector helps advance questions smoothly.</li>
-              <li>You can pause or manually submit answers at any time.</li>
+          <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-left text-xs space-y-2 text-slate-600 dark:text-slate-300">
+            <div className="font-bold text-slate-800 dark:text-white">How this studio works:</div>
+            <ul className="space-y-1.5 list-disc pl-4 text-slate-600 dark:text-slate-400">
+              <li>The AI interviewer speaks each question aloud in natural voice.</li>
+              <li>Your microphone automatically activates as soon as the question finishes.</li>
+              <li>Your spoken words transcribe in real time into your answer box.</li>
+              <li>Click <strong>&ldquo;Next Question&rdquo;</strong> whenever you finish speaking.</li>
             </ul>
           </div>
 
           {permissionError && (
-            <div className="p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-xs flex items-center gap-2">
-              <AlertCircle className="w-4 h-4 shrink-0 text-amber-600" />
-              <span>{permissionError} (Check browser camera permissions)</span>
+            <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 text-amber-800 dark:text-amber-300 rounded-2xl text-xs flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
+              <span>{permissionError} (Check browser camera/microphone permissions)</span>
             </div>
           )}
 
           <button
             onClick={handleStartSession}
-            className="w-full inline-flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl bg-indigo-600 hover:bg-indigo-700 font-bold text-sm text-white transition-all shadow-md shadow-indigo-200"
+            className="w-full inline-flex items-center justify-center gap-2 py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 font-bold text-sm text-white transition-all shadow-md shadow-indigo-500/25 active:scale-95"
           >
             <Play className="w-4 h-4 fill-white" />
-            <span>Enable Camera & Enter Room</span>
+            <span>Enable Camera & Enter Interview Studio</span>
           </button>
         </div>
       </div>
@@ -252,14 +266,14 @@ export default function LiveInterviewRoomPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-6 max-w-6xl mx-auto pb-8">
       {/* Top Session Progress Bar */}
-      <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+      <div className="flex items-center justify-between bg-white dark:bg-slate-900 p-4 px-5 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xs transition-colors">
         <div>
-          <div className="text-[11px] font-bold tracking-wider text-indigo-600 uppercase">
+          <div className="text-[11px] font-bold tracking-wider text-indigo-600 dark:text-indigo-400 uppercase">
             Round {currentRoundIdx + 1} of {session.rounds.length}: {currentRound?.title}
           </div>
-          <div className="text-sm font-extrabold text-slate-800">{session.jobTitle} Mock Session</div>
+          <div className="text-sm font-black text-slate-800 dark:text-white">{session.jobTitle} Mock Session</div>
         </div>
 
         {/* 5-Round Progress Badges */}
@@ -267,12 +281,12 @@ export default function LiveInterviewRoomPage() {
           {session.rounds.map((r: SessionRound, idx: number) => (
             <div
               key={r.id}
-              className={`w-7 h-7 rounded-lg text-xs font-bold flex items-center justify-center transition-all ${
+              className={`w-7 h-7 rounded-xl text-xs font-bold flex items-center justify-center transition-all ${
                 idx === currentRoundIdx
                   ? "bg-indigo-600 text-white shadow-xs"
                   : idx < currentRoundIdx
-                  ? "bg-emerald-100 text-emerald-700"
-                  : "bg-slate-100 text-slate-400"
+                  ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300"
+                  : "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500"
               }`}
             >
               {idx + 1}
@@ -301,7 +315,7 @@ export default function LiveInterviewRoomPage() {
             totalQuestions={currentRound?.questions.length || 1}
           />
 
-          {/* User Live Webcam Feed */}
+          {/* User Live Webcam Feed & Live Transcript */}
           <UserWebcamStream
             videoRef={videoRef}
             mediaStream={mediaStream}
@@ -313,7 +327,54 @@ export default function LiveInterviewRoomPage() {
         </div>
       )}
 
-      {/* 10-Second Silence Detector Banner */}
+      {/* Live Mic Listening Status Indicator Banner */}
+      {!isCodingRound && (
+        <div className={`p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
+          isAiSpeaking
+            ? "bg-indigo-50/50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800 text-indigo-900 dark:text-indigo-200"
+            : isUserSpeaking
+            ? "bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200"
+            : "bg-slate-50 dark:bg-slate-850 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+        }`}>
+          <div className="flex items-center gap-2.5">
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
+              isAiSpeaking
+                ? "bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300"
+                : isUserSpeaking
+                ? "bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-300 animate-pulse"
+                : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+            }`}>
+              <Mic className="w-4 h-4" />
+            </div>
+            <div className="text-xs">
+              <span className="font-bold block">
+                {isAiSpeaking
+                  ? "AI Interviewer is speaking..."
+                  : isUserSpeaking
+                  ? "Transcribing your voice in real time..."
+                  : "Microphone Active: Speak your answer clearly into your mic"}
+              </span>
+              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+                {liveTranscript
+                  ? `${liveTranscript.split(/\s+/).filter(Boolean).length} words recorded`
+                  : "Your transcribed words will appear on your webcam screen."}
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => handleSubmitAnswer()}
+            disabled={isEvaluating}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold transition-all shadow-md shadow-indigo-500/25 active:scale-95 shrink-0"
+          >
+            <span>{isEvaluating ? "Evaluating..." : "Submit Answer"}</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {/* Silence Detector Banner (Only shows when user pauses for 7s after speaking) */}
       {!isCodingRound && (
         <SilenceDetector
           countdown={silenceCountdown}
