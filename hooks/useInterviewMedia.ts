@@ -34,6 +34,8 @@ export function useInterviewMedia(options: UseInterviewMediaOptions = {}) {
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const onSilenceTimeoutRef = useRef(onSilenceTimeout);
+  const isCountingDownRef = useRef(false);
+  const lastRecordedWordCountRef = useRef(0);
 
   useEffect(() => {
     onSilenceTimeoutRef.current = onSilenceTimeout;
@@ -43,7 +45,7 @@ export function useInterviewMedia(options: UseInterviewMediaOptions = {}) {
     isMicOnRef.current = isMicOn;
   }, [isMicOn]);
 
-  // Reset Silence Timers
+  // Reset Silence Timers completely
   const resetSilenceDetection = useCallback(() => {
     if (silenceTimerRef.current) {
       clearTimeout(silenceTimerRef.current);
@@ -53,6 +55,7 @@ export function useInterviewMedia(options: UseInterviewMediaOptions = {}) {
       clearInterval(countdownIntervalRef.current);
       countdownIntervalRef.current = null;
     }
+    isCountingDownRef.current = false;
     setSilenceCountdown(null);
   }, []);
 
@@ -62,6 +65,7 @@ export function useInterviewMedia(options: UseInterviewMediaOptions = {}) {
     if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
     if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
 
+    isCountingDownRef.current = true;
     let timeLeft = duration;
     setSilenceCountdown(timeLeft);
 
@@ -72,6 +76,7 @@ export function useInterviewMedia(options: UseInterviewMediaOptions = {}) {
           clearInterval(countdownIntervalRef.current);
           countdownIntervalRef.current = null;
         }
+        isCountingDownRef.current = false;
         setSilenceCountdown(null);
         // Fire timeout callback to automatically advance
         if (onSilenceTimeoutRef.current) {
@@ -157,6 +162,7 @@ export function useInterviewMedia(options: UseInterviewMediaOptions = {}) {
   // Start Listening strictly when AI is NOT speaking
   const startListening = useCallback(() => {
     resetSilenceDetection();
+    lastRecordedWordCountRef.current = 0;
     if (isAiSpeakingRef.current || !isMicOnRef.current) return;
 
     isListeningRef.current = true;
@@ -208,19 +214,33 @@ export function useInterviewMedia(options: UseInterviewMediaOptions = {}) {
 
       const fullText = (finalStr + interimStr).trim();
       if (fullText) {
+        const currentWords = fullText.split(/\s+/).filter(Boolean).length;
         setLiveTranscript(fullText);
         if (onTranscriptUpdate) onTranscriptUpdate(fullText);
 
-        // User is actively speaking -> clear any silence countdown
         setIsUserSpeaking(true);
-        resetSilenceDetection();
 
-        // After user speaks, if they pause for 4.5 seconds, start 5s auto-advance countdown
-        if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-        silenceTimerRef.current = setTimeout(() => {
-          setIsUserSpeaking(false);
-          startSilenceCountdown(5);
-        }, 4500);
+        // If a countdown is actively running: only cancel it if the user spoke at least 2 NEW words
+        if (isCountingDownRef.current) {
+          if (currentWords >= lastRecordedWordCountRef.current + 2) {
+            // User resumed answering with meaningful new content
+            resetSilenceDetection();
+            lastRecordedWordCountRef.current = currentWords;
+          } else {
+            // Minor background sound / interim flutter - keep countdown steady without blinking off!
+            return;
+          }
+        }
+
+        // Only start pause countdown if candidate has answered at least 4 words
+        if (currentWords >= 4) {
+          lastRecordedWordCountRef.current = currentWords;
+          if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+          silenceTimerRef.current = setTimeout(() => {
+            setIsUserSpeaking(false);
+            startSilenceCountdown(5);
+          }, 5000);
+        }
       }
     };
 
@@ -258,6 +278,7 @@ export function useInterviewMedia(options: UseInterviewMediaOptions = {}) {
       setIsAiSpeaking(true);
       isAiSpeakingRef.current = true;
       setLiveTranscript("");
+      lastRecordedWordCountRef.current = 0;
 
       if (typeof window === "undefined" || !("speechSynthesis" in window)) {
         setIsAiSpeaking(false);
@@ -282,24 +303,27 @@ export function useInterviewMedia(options: UseInterviewMediaOptions = {}) {
       utterance.pitch = 1.0;
       utterance.lang = "en-US";
 
-      // Select natural voice if available
+      // Select natural English voice if available
       const voices = window.speechSynthesis.getVoices();
       const preferredVoice = voices.find(
         (v) =>
-          v.lang.includes("en") &&
           (v.name.includes("Natural") ||
             v.name.includes("Google") ||
             v.name.includes("Samantha") ||
-            v.name.includes("Daniel"))
+            v.name.includes("Jenny") ||
+            v.name.includes("Guy") ||
+            v.name.includes("David")) &&
+          v.lang.startsWith("en")
       );
-      if (preferredVoice) utterance.voice = preferredVoice;
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+      }
 
-      const finishSpeech = () => {
+      utterance.onend = () => {
         setIsAiSpeaking(false);
         isAiSpeakingRef.current = false;
         if (onComplete) onComplete();
-
-        // Add small 400ms delay so speaker reverb does not bleed into the mic
+        // Buffer 400ms before activating candidate's mic
         setTimeout(() => {
           if (!isAiSpeakingRef.current) {
             startListening();
@@ -307,33 +331,30 @@ export function useInterviewMedia(options: UseInterviewMediaOptions = {}) {
         }, 400);
       };
 
-      utterance.onend = finishSpeech;
-      utterance.onerror = finishSpeech;
+      utterance.onerror = (e) => {
+        if (e.error !== "canceled" && e.error !== "interrupted") {
+          console.warn("Speech synthesis notice:", e.error);
+        }
+        setIsAiSpeaking(false);
+        isAiSpeakingRef.current = false;
+        if (onComplete) onComplete();
+        setTimeout(() => {
+          if (!isAiSpeakingRef.current) {
+            startListening();
+          }
+        }, 400);
+      };
 
       window.speechSynthesis.speak(utterance);
     },
     [isAiVoiceOn, startListening, stopListening]
   );
 
-  // Stop all media on unmount
-  useEffect(() => {
-    return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((t) => t.stop());
-      }
-      if (typeof window !== "undefined" && "speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-      }
-      resetSilenceDetection();
-    };
-  }, [resetSilenceDetection]);
-
   return {
-    videoRef,
-    mediaStream,
     hasPermissions,
     permissionError,
-    requestMediaPermissions,
+    mediaStream,
+    videoRef,
     isCameraOn,
     toggleCamera,
     isMicOn,
@@ -346,10 +367,11 @@ export function useInterviewMedia(options: UseInterviewMediaOptions = {}) {
     liveTranscript,
     setLiveTranscript,
     silenceCountdown,
-    resetSilenceDetection,
     speechRecognitionSupported,
-    startListening,
-    stopListening,
+    requestMediaPermissions,
     speakQuestion,
+    stopListening,
+    startListening,
+    resetSilenceDetection,
   };
 }
