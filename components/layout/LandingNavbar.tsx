@@ -3,27 +3,30 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { BrandLogo } from "@/components/common/BrandLogo";
+import { ThemeToggle } from "@/components/common/ThemeToggle";
 
 export function LandingNavbar() {
   return (
-    <header className="w-full bg-white/85 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-50 shadow-2xs">
+    <header className="w-full bg-white/85 dark:bg-stone-900/85 backdrop-blur-md border-b border-stone-200/80 dark:border-stone-800 sticky top-0 z-50 shadow-2xs transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Brand Logo */}
         <BrandLogo href="/" size="md" />
 
         {/* Navigation Links */}
-        <nav className="hidden md:flex items-center gap-8 text-xs font-bold text-slate-600">
-          <a href="#workflow" className="hover:text-indigo-600 transition-colors">Workflow</a>
-          <a href="#features" className="hover:text-indigo-600 transition-colors">Features</a>
-          <a href="#interview" className="hover:text-indigo-600 transition-colors">AI Video Interview</a>
-          <a href="#tech" className="hover:text-indigo-600 transition-colors">Free-First Tech</a>
+        <nav className="hidden md:flex items-center gap-8 text-xs font-bold text-stone-600 dark:text-stone-300">
+          <a href="#workflow" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Workflow</a>
+          <a href="#features" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Features</a>
+          <a href="#interview" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">AI Video Interview</a>
+          <a href="#tech" className="hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">Free-First Tech</a>
         </nav>
 
-        {/* CTA Buttons */}
+        {/* CTA Buttons & Theme Toggle */}
         <div className="flex items-center gap-3">
+          <ThemeToggle />
+
           <Link
             href="/dashboard"
-            className="text-xs font-bold text-slate-700 hover:text-indigo-600 px-3 py-2 transition-colors"
+            className="text-xs font-bold text-stone-700 dark:text-stone-200 hover:text-indigo-600 dark:hover:text-indigo-400 px-3 py-2 transition-colors"
           >
             Dashboard
           </Link>
