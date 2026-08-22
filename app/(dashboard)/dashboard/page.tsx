@@ -13,9 +13,6 @@ import {
   AlertTriangle,
   Loader2,
   UploadCloud,
-  TrendingUp,
-  Cpu,
-  Award,
 } from "lucide-react";
 import { ScoreTrendChart } from "@/components/dashboard/ScoreTrendChart";
 import { CompetencyRadarChart } from "@/components/dashboard/CompetencyRadarChart";
@@ -53,8 +50,8 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="py-24 flex flex-col items-center justify-center space-y-3">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-        <span className="text-xs font-bold text-slate-500">Loading your live performance metrics...</span>
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
+        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Loading your live performance metrics...</span>
       </div>
     );
   }
@@ -66,7 +63,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 pb-8">
       {/* Sleek Hero Welcome Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-slate-800 p-6 sm:p-8 text-white shadow-lg">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-950 border border-slate-800 p-6 sm:p-8 text-white shadow-lg">
         {/* Ambient Glowing Orbs */}
         <div className="absolute -top-24 -left-24 w-72 h-72 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-cyan-500/15 rounded-full blur-3xl pointer-events-none" />
@@ -103,23 +100,23 @@ export default function DashboardPage() {
       {/* Top 4 Performance Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* 1. Resume Overall Score */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between group">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">
+            <span className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Resume ATS Score
             </span>
-            <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+            <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
               <FileText className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-4">
             <div className="flex items-baseline gap-2">
-              <span className={`text-3xl font-black ${data?.resumeScore ? resumeColors.text : "text-slate-400"}`}>
+              <span className={`text-3xl font-black ${data?.resumeScore ? resumeColors.text : "text-slate-400 dark:text-slate-500"}`}>
                 {data?.resumeScore || 0}
               </span>
-              <span className="text-xs font-semibold text-slate-400">/ 100</span>
+              <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">/ 100</span>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-2 mt-3 overflow-hidden">
+            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 mt-3 overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-indigo-600 to-violet-600 rounded-full transition-all duration-500"
                 style={{ width: `${data?.resumeScore || 0}%` }}
@@ -127,38 +124,38 @@ export default function DashboardPage() {
             </div>
             <div className="mt-3 flex items-center justify-between text-[11px]">
               {data?.resumeScore ? (
-                <span className="text-emerald-700 font-bold flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <span className="text-emerald-700 dark:text-emerald-400 font-bold flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                   ATS Verified
                 </span>
               ) : (
-                <Link href="/resume-analyzer" className="text-indigo-600 font-bold hover:underline">
+                <Link href="/resume-analyzer" className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">
                   Upload resume to score &rarr;
                 </Link>
               )}
-              <span className="text-slate-400 font-medium">ATS Target: 80+</span>
+              <span className="text-slate-400 dark:text-slate-500 font-medium">ATS Target: 80+</span>
             </div>
           </div>
         </div>
 
         {/* 2. Target Job Match */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between group">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">
+            <span className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Job Match Fit
             </span>
-            <div className="p-2 rounded-xl bg-violet-50 text-violet-600 group-hover:bg-violet-600 group-hover:text-white transition-colors">
+            <div className="p-2 rounded-xl bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 group-hover:bg-violet-600 group-hover:text-white transition-colors">
               <Target className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-4">
             <div className="flex items-baseline gap-2">
-              <span className={`text-3xl font-black ${data?.latestMatchScore ? matchColors.text : "text-slate-400"}`}>
+              <span className={`text-3xl font-black ${data?.latestMatchScore ? matchColors.text : "text-slate-400 dark:text-slate-500"}`}>
                 {data?.latestMatchScore || 0}
               </span>
-              <span className="text-xs font-semibold text-slate-400">%</span>
+              <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">%</span>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-2 mt-3 overflow-hidden">
+            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 mt-3 overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-violet-600 to-indigo-600 rounded-full transition-all duration-500"
                 style={{ width: `${data?.latestMatchScore || 0}%` }}
@@ -166,37 +163,37 @@ export default function DashboardPage() {
             </div>
             <div className="mt-3 flex items-center justify-between text-[11px]">
               {data?.latestMatchScore ? (
-                <span className="text-slate-700 font-bold truncate max-w-[140px]">
+                <span className="text-slate-700 dark:text-slate-300 font-bold truncate max-w-[140px]">
                   {data.targetRole || "Software Engineer"}
                 </span>
               ) : (
-                <Link href="/job-match" className="text-indigo-600 font-bold hover:underline">
+                <Link href="/job-match" className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">
                   Compare with JD &rarr;
                 </Link>
               )}
-              <span className="text-slate-400 font-medium">Target: 85%+</span>
+              <span className="text-slate-400 dark:text-slate-500 font-medium">Target: 85%+</span>
             </div>
           </div>
         </div>
 
         {/* 3. Mock Interview Performance */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between group">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">
+            <span className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Interview Score
             </span>
-            <div className="p-2 rounded-xl bg-cyan-50 text-cyan-600 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
+            <div className="p-2 rounded-xl bg-cyan-50 dark:bg-cyan-950/60 text-cyan-600 dark:text-cyan-400 group-hover:bg-cyan-600 group-hover:text-white transition-colors">
               <Video className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-4">
             <div className="flex items-baseline gap-2">
-              <span className={`text-3xl font-black ${data?.latestInterviewScore ? interviewColors.text : "text-slate-400"}`}>
+              <span className={`text-3xl font-black ${data?.latestInterviewScore ? interviewColors.text : "text-slate-400 dark:text-slate-500"}`}>
                 {data?.latestInterviewScore || 0}
               </span>
-              <span className="text-xs font-semibold text-slate-400">/ 100</span>
+              <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">/ 100</span>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-2 mt-3 overflow-hidden">
+            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 mt-3 overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-cyan-600 to-indigo-600 rounded-full transition-all duration-500"
                 style={{ width: `${data?.latestInterviewScore || 0}%` }}
@@ -204,47 +201,47 @@ export default function DashboardPage() {
             </div>
             <div className="mt-3 flex items-center justify-between text-[11px]">
               {data?.latestInterviewScore ? (
-                <span className="text-emerald-700 font-bold">
+                <span className="text-emerald-700 dark:text-emerald-400 font-bold">
                   {data.interviewRoundsCompleted || 5} Rounds Evaluated
                 </span>
               ) : (
-                <Link href="/mock-interview" className="text-indigo-600 font-bold hover:underline">
+                <Link href="/mock-interview" className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">
                   Start 5-round studio &rarr;
                 </Link>
               )}
-              <span className="text-slate-400 font-medium">Pass: 75+</span>
+              <span className="text-slate-400 dark:text-slate-500 font-medium">Pass: 75+</span>
             </div>
           </div>
         </div>
 
         {/* 4. Learning Roadmap Progress */}
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/90 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between group">
+        <div className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">
+            <span className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Roadmap Progress
             </span>
-            <div className="p-2 rounded-xl bg-amber-50 text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-colors">
+            <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 group-hover:bg-amber-600 group-hover:text-white transition-colors">
               <Compass className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-4">
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black text-slate-900">
+              <span className="text-3xl font-black text-slate-900 dark:text-white">
                 {data?.roadmapCompletionPct || 0}
               </span>
-              <span className="text-xs font-semibold text-slate-400">% completed</span>
+              <span className="text-xs font-semibold text-slate-400 dark:text-slate-500">% completed</span>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-2 mt-3 overflow-hidden">
+            <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 mt-3 overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-amber-500 to-indigo-600 rounded-full transition-all duration-500"
                 style={{ width: `${data?.roadmapCompletionPct || 0}%` }}
               />
             </div>
             <div className="mt-3 flex items-center justify-between text-[11px]">
-              <Link href="/roadmap" className="text-indigo-600 font-bold hover:underline">
+              <Link href="/roadmap" className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">
                 View 4-week milestones &rarr;
               </Link>
-              <span className="text-slate-400 font-medium">4 Weeks</span>
+              <span className="text-slate-400 dark:text-slate-500 font-medium">4 Weeks</span>
             </div>
           </div>
         </div>
@@ -263,17 +260,17 @@ export default function DashboardPage() {
       {/* Verified Skills & Identified Improvement Areas */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Strong Verified Skills */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-xs space-y-4">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+              <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
-              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">
+              <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
                 Verified Candidate Skills
               </h3>
             </div>
-            <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60">
+            <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-200/60 dark:border-emerald-800">
               {data?.strongSkills?.length || 0} Detected
             </span>
           </div>
@@ -283,13 +280,13 @@ export default function DashboardPage() {
               data.strongSkills.map((skill, idx) => (
                 <span
                   key={idx}
-                  className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 hover:border-indigo-300 hover:text-indigo-600 transition-colors cursor-default"
+                  className="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 hover:border-indigo-300 dark:hover:border-indigo-600 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors cursor-default"
                 >
                   {skill}
                 </span>
               ))
             ) : (
-              <p className="text-xs text-slate-400 py-4">
+              <p className="text-xs text-slate-400 dark:text-slate-500 py-4">
                 Upload your resume to extract and verify your technical skills.
               </p>
             )}
@@ -297,17 +294,17 @@ export default function DashboardPage() {
         </div>
 
         {/* Priority Focus Areas */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200/90 shadow-xs space-y-4">
+        <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-amber-50 text-amber-600">
+              <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400">
                 <AlertTriangle className="w-4 h-4" />
               </div>
-              <h3 className="text-sm font-black text-slate-900 uppercase tracking-wider">
+              <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">
                 Priority Growth Areas
               </h3>
             </div>
-            <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2.5 py-0.5 rounded-full border border-amber-200/60">
+            <span className="text-[11px] font-bold text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/60 px-2.5 py-0.5 rounded-full border border-amber-200/60 dark:border-amber-800">
               To Master
             </span>
           </div>
@@ -317,14 +314,14 @@ export default function DashboardPage() {
               data.needsImprovement.map((skill, idx) => (
                 <span
                   key={idx}
-                  className="px-3 py-1.5 rounded-xl bg-amber-50/50 border border-amber-200 text-xs font-bold text-amber-900 flex items-center gap-1.5"
+                  className="px-3 py-1.5 rounded-xl bg-amber-50/50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 text-xs font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5"
                 >
-                  <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-amber-500 dark:bg-amber-400" />
                   <span>{skill}</span>
                 </span>
               ))
             ) : (
-              <p className="text-xs text-slate-400 py-4">
+              <p className="text-xs text-slate-400 dark:text-slate-500 py-4">
                 Compare with a job posting or complete an interview to discover targeted areas to strengthen.
               </p>
             )}

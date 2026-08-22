@@ -21,20 +21,20 @@ export function ScoreTrendChart({ data }: ScoreTrendChartProps) {
   const hasScores = data && data.length > 0;
 
   return (
-    <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between min-h-[360px]">
+    <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xs flex flex-col justify-between min-h-[360px] transition-colors">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-2xs">
             <TrendingUp className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900">Interview Score Progression</h3>
-            <span className="text-[11px] text-slate-500">Historical performance trajectory</span>
+            <h3 className="text-sm font-black text-slate-900 dark:text-white">Interview Score Progression</h3>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">Historical performance trajectory</span>
           </div>
         </div>
 
         {hasScores && data.length > 1 && (
-          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+          <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
             {data[data.length - 1].score >= data[0].score ? "+" : ""}
             {data[data.length - 1].score - data[0].score} pts
           </span>
@@ -45,7 +45,7 @@ export function ScoreTrendChart({ data }: ScoreTrendChartProps) {
         <div className="h-60 w-full pt-2">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={data} margin={{ top: 10, right: 20, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" className="dark:stroke-slate-800" vertical={false} />
               <XAxis
                 dataKey="label"
                 stroke="#94a3b8"
@@ -62,48 +62,45 @@ export function ScoreTrendChart({ data }: ScoreTrendChartProps) {
               />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: "#ffffff",
-                  borderRadius: "0.75rem",
-                  border: "1px solid #e2e8f0",
-                  boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.05)",
+                  borderRadius: "12px",
+                  border: "1px solid rgba(226, 232, 240, 0.8)",
+                  backgroundColor: "rgba(15, 23, 42, 0.95)",
+                  color: "#f8fafc",
+                  boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
                   fontSize: "12px",
-                  fontWeight: "600",
                 }}
-                formatter={(val: unknown) => [`${val}/100`, "Overall Score"]}
               />
               <Line
                 type="monotone"
                 dataKey="score"
-                stroke="#4f46e5"
+                stroke="#6366f1"
                 strokeWidth={3}
-                dot={{ r: 5, fill: "#4f46e5", strokeWidth: 2, stroke: "#ffffff" }}
-                activeDot={{ r: 7, fill: "#4f46e5" }}
+                dot={{ fill: "#6366f1", strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6, fill: "#4f46e5" }}
               />
             </LineChart>
           </ResponsiveContainer>
         </div>
       ) : (
-        <div className="h-60 w-full flex flex-col items-center justify-center text-center p-6 border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
-          <div className="w-10 h-10 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mb-3">
-            <Video className="w-5 h-5" />
+        <div className="py-12 px-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-dashed border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center text-center space-y-3">
+          <div className="w-10 h-10 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+            <Sparkles className="w-5 h-5" />
           </div>
-          <h4 className="text-xs font-bold text-slate-800">No Interview Sessions Yet</h4>
-          <p className="text-[11px] text-slate-500 max-w-xs mt-1 mb-4">
-            Practice your first 5-round video mock interview to start tracking your performance growth over time.
-          </p>
+          <div className="space-y-1 max-w-sm">
+            <p className="text-xs font-bold text-slate-800 dark:text-slate-200">No mock interview trajectories recorded yet</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              Practice your first 5-round video mock interview to start tracking your performance growth over time.
+            </p>
+          </div>
           <Link
             href="/mock-interview"
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors shadow-xs"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 text-white font-bold text-xs hover:bg-indigo-700 transition-colors shadow-xs"
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Video className="w-3.5 h-3.5" />
             <span>Start First Mock Session</span>
           </Link>
         </div>
       )}
-
-      <p className="text-[11px] text-slate-400 mt-2 text-center">
-        Consistent mock interview practice increases offer rates by 3.4x.
-      </p>
     </div>
   );
 }

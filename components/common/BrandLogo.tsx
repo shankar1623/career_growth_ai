@@ -33,13 +33,13 @@ export function BrandLogo({ href = "/dashboard", size = "md", className = "" }: 
       {/* Modern Wordmark */}
       <div className="flex items-baseline">
         <span
-          className={`font-black tracking-tight text-slate-900 ${
+          className={`font-black tracking-tight text-stone-900 dark:text-white ${
             isSm ? "text-sm" : isLg ? "text-xl" : "text-base"
           }`}
         >
-          Career<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-violet-600">Growth</span>
+          Career<span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-violet-500">Growth</span>
         </span>
-        <span className="ml-1 text-[10px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200/60 shadow-2xs">
+        <span className="ml-1 text-[10px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800 shadow-2xs">
           AI
         </span>
       </div>
