@@ -60,6 +60,26 @@ export default function LiveInterviewRoomPage() {
   const [isEvaluating, setIsEvaluating] = useState(false);
 
   const spokenQuestionIdRef = useRef<string | null>(null);
+  const sessionRef = useRef<SessionData | null>(null);
+  const roundIdxRef = useRef(0);
+  const questionIdxRef = useRef(0);
+  const liveTranscriptRef = useRef("");
+  const isEvaluatingRef = useRef(false);
+
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
+
+  useEffect(() => {
+    roundIdxRef.current = currentRoundIdx;
+  }, [currentRoundIdx]);
+
+  useEffect(() => {
+    questionIdxRef.current = currentQuestionIdx;
+  }, [currentQuestionIdx]);
+
+  // Forward declaration ref for submitAnswer to avoid stale closures in hook
+  const submitAnswerRef = useRef<(customText?: string) => Promise<void>>(() => Promise.resolve());
 
   // Custom Media Hook
   const {
@@ -85,10 +105,16 @@ export default function LiveInterviewRoomPage() {
   } = useInterviewMedia({
     enableSilenceDetection: true,
     onSilenceTimeout: () => {
-      // Auto advance only after long pause
-      handleSubmitAnswer();
+      // Automatically advance when silence countdown expires
+      if (submitAnswerRef.current) {
+        submitAnswerRef.current();
+      }
     },
   });
+
+  useEffect(() => {
+    liveTranscriptRef.current = liveTranscript;
+  }, [liveTranscript]);
 
   // Fetch Interview Details
   useEffect(() => {
@@ -116,7 +142,7 @@ export default function LiveInterviewRoomPage() {
   const currentQuestion = currentRound?.questions[currentQuestionIdx];
   const isCodingRound = currentRound?.roundType === "CODING";
 
-  // Trigger AI Voice exactly once per question
+  // Trigger AI Voice exactly once per question when studio is active
   useEffect(() => {
     if (hasStarted && currentQuestion && !isCodingRound) {
       if (spokenQuestionIdRef.current !== currentQuestion.id) {
@@ -135,47 +161,65 @@ export default function LiveInterviewRoomPage() {
     }
   };
 
-  // Submit Answer & Transition
+  // Submit Answer & Transition to Next Question
   const handleSubmitAnswer = useCallback(async (customText?: string) => {
-    if (!currentQuestion || isEvaluating) return;
+    const activeSession = sessionRef.current;
+    if (!activeSession) return;
+
+    const rIdx = roundIdxRef.current;
+    const qIdx = questionIdxRef.current;
+    const activeRound = activeSession.rounds[rIdx];
+    const activeQuestion = activeRound?.questions[qIdx];
+
+    if (!activeQuestion || isEvaluatingRef.current) return;
+
+    isEvaluatingRef.current = true;
     setIsEvaluating(true);
     resetSilenceDetection();
     stopListening();
 
-    const answerText = (customText || liveTranscript || "").trim();
-    const finalTranscript = answerText.length > 0 ? answerText : "(Question Skipped / No answer provided)";
+    const answerText = (customText !== undefined ? customText : liveTranscriptRef.current).trim();
+    const finalTranscript = answerText.length > 0 ? answerText : "(Candidate proceeded to next question)";
 
+    // Clear transcript for upcoming question
+    setLiveTranscript("");
+
+    // Advance question/round state
+    if (activeRound && qIdx < activeRound.questions.length - 1) {
+      setCurrentQuestionIdx((prev) => prev + 1);
+    } else if (activeSession && rIdx < activeSession.rounds.length - 1) {
+      setCurrentRoundIdx((prev) => prev + 1);
+      setCurrentQuestionIdx(0);
+    } else {
+      // Final round completed
+      await fetch(`/api/interview/${id}/complete`, { method: "POST" });
+      router.push(`/interview/${id}/results`);
+      return;
+    }
+
+    // Persist answer asynchronously
     try {
       await fetch("/api/interview/answer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          questionId: currentQuestion.id,
+          questionId: activeQuestion.id,
           transcript: finalTranscript,
-          roundType: currentRound?.roundType,
+          roundType: activeRound?.roundType,
         }),
       });
-
-      // Clear transcript for next question
-      setLiveTranscript("");
-
-      // Move to next question or next round
-      if (currentRound && currentQuestionIdx < currentRound.questions.length - 1) {
-        setCurrentQuestionIdx((prev) => prev + 1);
-      } else if (session && currentRoundIdx < session.rounds.length - 1) {
-        setCurrentRoundIdx((prev) => prev + 1);
-        setCurrentQuestionIdx(0);
-      } else {
-        // All 5 rounds completed! Complete interview & route to results
-        await fetch(`/api/interview/${id}/complete`, { method: "POST" });
-        router.push(`/interview/${id}/results`);
-      }
     } catch (err) {
-      console.error("Failed to submit answer:", err);
+      console.error("Failed to save answer:", err);
     } finally {
+      isEvaluatingRef.current = false;
       setIsEvaluating(false);
     }
-  }, [currentQuestion, isEvaluating, resetSilenceDetection, stopListening, liveTranscript, currentRound, session, currentRoundIdx, currentQuestionIdx, setLiveTranscript, id, router]);
+  }, [id, resetSilenceDetection, router, setLiveTranscript, stopListening]);
+
+  // Keep ref up to date
+  useEffect(() => {
+    submitAnswerRef.current = handleSubmitAnswer;
+  }, [handleSubmitAnswer]);
 
   // Coding Round Completion Handler
   const handleCodingComplete = async () => {
@@ -240,9 +284,9 @@ export default function LiveInterviewRoomPage() {
             <div className="font-bold text-slate-800 dark:text-white">How this studio works:</div>
             <ul className="space-y-1.5 list-disc pl-4 text-slate-600 dark:text-slate-400">
               <li>The AI interviewer speaks each question aloud in natural voice.</li>
-              <li>Your microphone automatically activates as soon as the question finishes.</li>
-              <li>Your spoken words transcribe in real time into your answer box.</li>
-              <li>Click <strong>&ldquo;Next Question&rdquo;</strong> whenever you finish speaking.</li>
+              <li>Your microphone automatically activates after the AI finishes speaking.</li>
+              <li>Speak your answer clearly — your words appear on the camera in real time.</li>
+              <li>Click <strong>&ldquo;Next Question&rdquo;</strong> or pause when finished to auto-advance.</li>
             </ul>
           </div>
 
@@ -352,7 +396,7 @@ export default function LiveInterviewRoomPage() {
                   ? "AI Interviewer is speaking..."
                   : isUserSpeaking
                   ? "Transcribing your voice in real time..."
-                  : "Microphone Active: Speak your answer clearly into your mic"}
+                  : "Microphone Active: Speak your answer clearly"}
               </span>
               <span className="text-[11px] text-slate-500 dark:text-slate-400">
                 {liveTranscript
@@ -368,13 +412,13 @@ export default function LiveInterviewRoomPage() {
             disabled={isEvaluating}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold transition-all shadow-md shadow-indigo-500/25 active:scale-95 shrink-0"
           >
-            <span>{isEvaluating ? "Evaluating..." : "Submit Answer"}</span>
+            <span>{isEvaluating ? "Saving..." : "Next Question"}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       )}
 
-      {/* Silence Detector Banner (Only shows when user pauses for 7s after speaking) */}
+      {/* Silence Detector Banner (Shows when user pauses after speaking) */}
       {!isCodingRound && (
         <SilenceDetector
           countdown={silenceCountdown}

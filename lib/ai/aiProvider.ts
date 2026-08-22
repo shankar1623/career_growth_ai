@@ -257,8 +257,8 @@ ${jdText ? `Target Job Description Requirements:\n${jdText.slice(0, 1200)}` : ""
 
 Generate the 5 structured rounds with high precision:
 Round 1: SELF_INTRO - 2 questions.
-  - Q1: Natural opening self-introduction question tailored to ${role} (e.g. "Welcome to your ${role} interview! Let's get started. Could you introduce yourself, walk me through your technical background, and share what drives you as an engineer?").
-  - Q2: Motivation question asking why they want this specific ${role} position and what problems they are passionate about solving.
+  - Q1: Direct opening self-introduction question: "Tell me about yourself, your background, and your key technical skills."
+  - Q2: "Why are you interested in this ${role} role, and what are your key career goals?"
 
 Round 2: RESUME_DEEP_DIVE - 2 questions.
   - Ask in-depth questions about specific project architectures, challenges, and tools extracted from the candidate's resume (or representative ${role} projects if no resume).

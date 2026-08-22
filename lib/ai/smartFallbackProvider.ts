@@ -515,25 +515,25 @@ export function generateSmartInterviewQuestions(
     questions: [
       {
         orderIndex: 1,
-        questionText: `Welcome to your ${role} interview! Let's begin. Could you please introduce yourself, walk me through your technical background, and share what drives you as an engineer?`,
+        questionText: "Tell me about yourself, your background, and your key technical skills.",
         category: "Self Introduction",
         difficulty: "Easy",
         idealAnswerPoints: [
           "Concise, structured background summary (1-2 minutes)",
           `Primary tech stack & domain passion (${topTechString || role})`,
           "Recent impactful project accomplishments",
-          "Clear enthusiasm for the role",
+          "Clear enthusiasm for software engineering",
         ],
       },
       {
         orderIndex: 2,
-        questionText: `What specifically motivated you to apply for this ${role} role (${experienceLevel}), and what type of engineering challenges excite you most?`,
+        questionText: `Why are you interested in this ${role} role, and what are your key career goals?`,
         category: "Role Motivation & Fit",
         difficulty: "Easy",
         idealAnswerPoints: [
           "Understanding of the core engineering responsibilities",
-          "Interest in solving domain-specific scalability or product problems",
-          "Alignment with team collaboration and continuous learning",
+          "Interest in solving technical challenges in this role",
+          "Alignment with team collaboration and career growth",
         ],
       },
     ],
