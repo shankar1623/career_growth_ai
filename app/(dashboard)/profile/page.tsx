@@ -75,23 +75,23 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8 pb-8">
       {/* Header */}
       <div>
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold mb-2">
+        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs font-semibold mb-2">
           <User className="w-3.5 h-3.5" />
           <span>Account & Profile</span>
         </div>
-        <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
           User Profile
         </h1>
-        <p className="text-xs text-slate-500 mt-1">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
           Manage your personal information, career target preferences, and view your activity summary.
         </p>
       </div>
 
       {/* User Information & Activity Summary Card */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-6">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xs p-6 space-y-6 transition-colors">
         <div className="flex items-center gap-4">
           {clerkUser?.imageUrl ? (
             <Image
@@ -99,18 +99,18 @@ export default function ProfilePage() {
               alt={displayName}
               width={56}
               height={56}
-              className="w-14 h-14 rounded-2xl object-cover border-2 border-indigo-200 shadow-md shadow-indigo-100"
+              className="w-14 h-14 rounded-2xl object-cover border-2 border-indigo-200 dark:border-indigo-800 shadow-md shadow-indigo-100 dark:shadow-indigo-950"
             />
           ) : (
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white font-extrabold text-lg flex items-center justify-center shadow-md shadow-indigo-100">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-600 to-violet-600 text-white font-black text-lg flex items-center justify-center shadow-md shadow-indigo-100 dark:shadow-indigo-950">
               {userInitials}
             </div>
           )}
 
           <div>
-            <h3 className="text-base font-bold text-slate-900">{displayName}</h3>
-            <p className="text-xs text-slate-500">{displayEmail}</p>
-            <span className="inline-block text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 mt-1">
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">{displayName}</h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{displayEmail}</p>
+            <span className="inline-block text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800 mt-1">
               Active Member
             </span>
           </div>
@@ -118,37 +118,37 @@ export default function ProfilePage() {
 
         {/* Real Database Analytics */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 shrink-0">
+          <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs flex items-start gap-3">
+            <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 shrink-0">
               <FileText className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-slate-500 block">Resumes Analyzed</span>
-              <strong className="text-base font-bold text-slate-900 mt-0.5 block">
+              <span className="text-slate-500 dark:text-slate-400 block">Resumes Analyzed</span>
+              <strong className="text-base font-bold text-slate-900 dark:text-white mt-0.5 block">
                 {stats.resumesCount} {stats.resumesCount === 1 ? "Document" : "Documents"}
               </strong>
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-indigo-50 text-indigo-600 shrink-0">
+          <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs flex items-start gap-3">
+            <div className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 shrink-0">
               <Video className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-slate-500 block">Mock Interviews Practiced</span>
-              <strong className="text-base font-bold text-indigo-600 mt-0.5 block">
+              <span className="text-slate-500 dark:text-slate-400 block">Mock Interviews Practiced</span>
+              <strong className="text-base font-bold text-indigo-600 dark:text-indigo-400 mt-0.5 block">
                 {stats.interviewsCount} {stats.interviewsCount === 1 ? "Session" : "Sessions"}
               </strong>
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600 shrink-0">
+          <div className="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs flex items-start gap-3">
+            <div className="p-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 shrink-0">
               <Compass className="w-4 h-4" />
             </div>
             <div>
-              <span className="text-slate-500 block">Roadmap Milestones Done</span>
-              <strong className="text-base font-bold text-emerald-600 mt-0.5 block">
+              <span className="text-slate-500 dark:text-slate-400 block">Roadmap Milestones Done</span>
+              <strong className="text-base font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 block">
                 {stats.completedRoadmapItems} of {stats.totalRoadmapItems} Completed
               </strong>
             </div>
@@ -157,36 +157,36 @@ export default function ProfilePage() {
       </div>
 
       {/* Career Preferences Form */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-5">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xs p-6 space-y-5 transition-colors">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shadow-2xs">
             <Briefcase className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900">Career & Interview Target Preferences</h3>
-            <span className="text-[11px] text-slate-500">Customize the target role and seniority for AI mock sessions</span>
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Career & Interview Target Preferences</h3>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400">Customize the target role and seniority for AI mock sessions</span>
           </div>
         </div>
 
         <form onSubmit={handleSavePreferences} className="space-y-4 pt-2">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-semibold text-slate-700 block mb-1">Primary Target Role</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Primary Target Role</label>
               <input
                 type="text"
                 value={targetRole}
                 onChange={(e) => setTargetRole(e.target.value)}
                 placeholder="e.g. Full-Stack Software Engineer"
-                className="w-full text-xs rounded-xl border border-slate-200 p-2.5 text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 p-2.5 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               />
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-slate-700 block mb-1">Seniority Level</label>
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Seniority Level</label>
               <select
                 value={experienceLevel}
                 onChange={(e) => setExperienceLevel(e.target.value)}
-                className="w-full text-xs rounded-xl border border-slate-200 p-2.5 bg-white text-slate-900 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 p-2.5 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               >
                 <option value="Fresher / Entry-Level (0-1 Years)">Fresher / Entry-Level (0-1 Years)</option>
                 <option value="Junior Software Developer (1-2 Years)">Junior Software Developer (1-2 Years)</option>
@@ -199,17 +199,17 @@ export default function ProfilePage() {
 
           <div className="flex items-center justify-between pt-2">
             {savedSuccess ? (
-              <span className="text-xs text-emerald-600 font-bold flex items-center gap-1.5 animate-in fade-in">
+              <span className="text-xs text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5 animate-in fade-in">
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Preferences saved successfully!</span>
               </span>
             ) : (
-              <span className="text-xs text-slate-400">Settings are automatically applied to your mock interview generator</span>
+              <span className="text-xs text-slate-400 dark:text-slate-500">Settings are automatically applied to your mock interview generator</span>
             )}
 
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-colors shadow-xs shadow-indigo-200"
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold transition-all shadow-md shadow-indigo-500/25 active:scale-95"
             >
               Save Preferences
             </button>
