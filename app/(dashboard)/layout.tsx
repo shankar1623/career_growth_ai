@@ -7,11 +7,11 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="h-screen w-full flex bg-slate-50/70 overflow-hidden relative selection:bg-indigo-600 selection:text-white">
+    <div className="h-screen w-full flex bg-[#fbf9f5] overflow-hidden relative selection:bg-indigo-600 selection:text-white text-stone-900">
       {/* Subtle Ambient Background Mesh */}
-      <div className="fixed inset-0 pointer-events-none z-0 opacity-40 bg-dot-grid" />
-      <div className="fixed top-0 right-1/4 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="fixed bottom-0 left-1/3 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed inset-0 pointer-events-none z-0 opacity-45 bg-dot-grid" />
+      <div className="fixed top-0 right-1/4 w-96 h-96 bg-indigo-400/5 rounded-full blur-3xl pointer-events-none" />
+      <div className="fixed bottom-0 left-1/3 w-96 h-96 bg-amber-400/5 rounded-full blur-3xl pointer-events-none" />
 
       {/* Sticky Left Sidebar */}
       <div className="h-screen sticky top-0 shrink-0 z-30 flex">

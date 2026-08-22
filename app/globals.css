@@ -2,22 +2,22 @@
 
 @layer base {
   :root {
-    --background: #f8fafc;
-    --foreground: #090d16;
+    --background: #fbf9f5;
+    --foreground: #1c1917;
     --card: #ffffff;
-    --card-foreground: #090d16;
+    --card-foreground: #1c1917;
     --primary: #4f46e5;
     --primary-foreground: #ffffff;
-    --secondary: #f1f5f9;
-    --secondary-foreground: #1e293b;
-    --muted: #f8fafc;
-    --muted-foreground: #64748b;
-    --accent: #eef2ff;
+    --secondary: #f5f1e9;
+    --secondary-foreground: #292524;
+    --muted: #fbf9f5;
+    --muted-foreground: #78716c;
+    --accent: #f5f3ff;
     --accent-foreground: #4338ca;
     --destructive: #ef4444;
     --destructive-foreground: #ffffff;
-    --border: #e2e8f0;
-    --input: #e2e8f0;
+    --border: #ece6da;
+    --input: #ece6da;
     --ring: #6366f1;
     --radius: 1rem;
   }
@@ -31,25 +31,25 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Modern Dot Mesh Pattern */
+/* Warm Cream-White Subtle Dot Mesh Pattern */
 .bg-dot-grid {
-  background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-  background-size: 20px 20px;
+  background-image: radial-gradient(#e4ded3 1.2px, transparent 1.2px);
+  background-size: 24px 24px;
 }
 
 /* Glassmorphism Card Style */
 .glass-card {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  border: 1px solid rgba(236, 230, 218, 0.9);
 }
 
 .glass-card-dark {
-  background: rgba(15, 23, 42, 0.85);
+  background: rgba(28, 25, 23, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(51, 65, 85, 0.6);
+  border: 1px solid rgba(68, 64, 60, 0.6);
 }
 
 /* Sleek Glowing Shadows */
@@ -97,9 +97,9 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #d6cfc3;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: #b5ac9d;
 }
