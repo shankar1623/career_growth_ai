@@ -754,7 +754,85 @@ export function generateSmartInterviewQuestions(
     ],
   };
 
-  // Round 5: Behavioral & HR Round
+  // Round 5: Behavioral & HR Round (Diverse pool randomized per interview)
+  const behavioralQuestionsPool: Array<{
+    questionText: string;
+    category: string;
+    difficulty: "Easy" | "Medium" | "Hard";
+    idealAnswerPoints: string[];
+  }> = [
+    {
+      questionText: `Tell me about a time when you were working on a critical feature under a tight deadline and requirements changed midway or you faced an unexpected technical roadblock. How did you handle the situation and deliver?`,
+      category: "STAR Behavioral - Adaptability & Deadlines",
+      difficulty: "Medium",
+      idealAnswerPoints: [
+        "Situation: Context, team, and initial goals",
+        "Task: Specific challenge or shifting requirement",
+        "Action: Prioritization, stakeholder communication, and technical solution",
+        "Result: Successful delivery, metrics, and key lessons learned",
+      ],
+    },
+    {
+      questionText: `Describe a situation where you had a technical disagreement with a teammate or received critical code review feedback on a pull request. How did you approach the discussion and reach a resolution?`,
+      category: "STAR Behavioral - Code Reviews & Collaboration",
+      difficulty: "Easy",
+      idealAnswerPoints: [
+        "Open, objective mindset toward constructive criticism",
+        "Evaluating trade-offs with benchmarks, metrics, and readability standards",
+        "Maintaining positive team trust and alignment",
+      ],
+    },
+    {
+      questionText: `Can you walk me through a time when a critical bug or service disruption occurred in production? How did you triage the issue under pressure, communicate with the team, and prevent future recurrences?`,
+      category: "STAR Behavioral - Incident Management",
+      difficulty: "Hard",
+      idealAnswerPoints: [
+        "Immediate containment and logging analysis to isolate the blast radius",
+        "Clear status communication to engineering and product stakeholders",
+        "Root cause discovery and deployment of a hotfix",
+        "Post-mortem documentation and regression test prevention",
+      ],
+    },
+    {
+      questionText: `Tell me about a time when you had to balance paying down technical debt or refactoring legacy code against delivering urgent product features. How did you prioritize and justify your decision?`,
+      category: "STAR Behavioral - Tech Debt vs Delivery",
+      difficulty: "Medium",
+      idealAnswerPoints: [
+        "Evaluating the risk of technical debt on developer velocity and system stability",
+        "Negotiating refactoring scope within sprint planning",
+        "Incremental refactoring strategy without stalling product milestones",
+        "Measurable gains in maintainability or test coverage",
+      ],
+    },
+    {
+      questionText: `Describe a project where requirements were vague or ambiguous at the start. What steps did you take to clarify requirements, define engineering milestones, and ensure project success?`,
+      category: "STAR Behavioral - Ambiguity & Ownership",
+      difficulty: "Medium",
+      idealAnswerPoints: [
+        "Proactively engaging with product managers and designers to write technical specs",
+        "Creating proof-of-concept prototypes to validate assumptions",
+        "Breaking down complex unknowns into testable, incremental tasks",
+        "Delivering a solution that satisfied user requirements",
+      ],
+    },
+    {
+      questionText: `Tell me about a time when you mentored a junior teammate or helped unblock a colleague who was struggling with a complex technical problem. How did you approach explaining the concepts?`,
+      category: "STAR Behavioral - Mentorship & Teamwork",
+      difficulty: "Easy",
+      idealAnswerPoints: [
+        "Empathetic pairing and diagnosing the underlying conceptual hurdle",
+        "Guiding through first principles rather than simply giving the answer",
+        "Encouraging good testing and debugging habits",
+        "Fostering team growth and autonomy",
+      ],
+    },
+  ];
+
+  // Randomly select 2 unique behavioral questions
+  const shuffledBehavioral = [...behavioralQuestionsPool].sort(() => 0.5 - Math.random());
+  const selectedB1 = shuffledBehavioral[0];
+  const selectedB2 = shuffledBehavioral[1];
+
   const round5: InterviewRoundData = {
     roundNumber: 5,
     roundType: "BEHAVIORAL_HR",
@@ -764,26 +842,17 @@ export function generateSmartInterviewQuestions(
     questions: [
       {
         orderIndex: 1,
-        questionText: `Tell me about a time when you were working on a critical feature under a tight deadline and requirements changed midway or you faced an unexpected technical roadblock. How did you handle the situation and deliver?`,
-        category: "STAR Behavioral - Adaptability",
-        difficulty: "Medium",
-        idealAnswerPoints: [
-          "Situation: Context, team, and initial goals",
-          "Task: Specific challenge or shifting requirement",
-          "Action: Prioritization, communication with stakeholders, and technical solution",
-          "Result: Successful delivery, metrics, and key lessons learned",
-        ],
+        questionText: selectedB1.questionText,
+        category: selectedB1.category,
+        difficulty: selectedB1.difficulty,
+        idealAnswerPoints: selectedB1.idealAnswerPoints,
       },
       {
         orderIndex: 2,
-        questionText: `Describe a situation where you had a technical disagreement with a teammate or received critical code review feedback on a pull request. How did you approach the discussion and reach a resolution?`,
-        category: "STAR Behavioral - Collaboration",
-        difficulty: "Easy",
-        idealAnswerPoints: [
-          "Open, objective mindset toward constructive criticism",
-          "Evaluating trade-offs with data and code readability benchmarks",
-          "Maintaining positive team trust and alignment",
-        ],
+        questionText: selectedB2.questionText,
+        category: selectedB2.category,
+        difficulty: selectedB2.difficulty,
+        idealAnswerPoints: selectedB2.idealAnswerPoints,
       },
     ],
   };
@@ -1113,19 +1182,21 @@ export function generateSmartLearningRoadmap(
         currentLevel: "Beginner",
         targetLevel: "Intermediate",
         topics: [
-          `Core concepts and architectural patterns for ${week1Skill}`,
-          "Containerization, service configuration, and environment setup",
-          "Automated pipelines and production deployment strategies",
-          "Security policies, IAM roles, and secret management",
+          `Core principles and fundamental architecture of ${week1Skill}`,
+          "Containerization, service configuration, and local setup",
+          "Automated CI/CD pipelines, linting, and build verification",
+          "Cloud deployment (AWS / Docker / Vercel) and environment secrets",
         ],
         practiceTasks: [
-          `Deploy a functional service utilizing ${week1Skill} in a sandbox environment`,
-          "Configure automated pipeline checks on commit and pull request",
-          "Document your architecture decisions and troubleshooting steps",
+          `Build and deploy a working service using ${week1Skill} in a cloud sandbox`,
+          "Configure automated GitHub Actions pipeline with build and test checks",
+          "Document your architecture decisions and error handling strategies",
         ],
         resources: [
-          { title: `${week1Skill} Official Documentation`, url: "https://docs.aws.amazon.com", type: "Documentation" },
-          { title: "Production Engineering Best Practices", url: "https://github.com", type: "Article" },
+          { title: "freeCodeCamp - Modern Cloud & DevOps Full Course (YouTube)", url: "https://www.youtube.com/c/Freecodecamp", type: "Video" },
+          { title: "TechWorld with Nana - Docker & Kubernetes for Beginners (YouTube)", url: "https://www.youtube.com/@TechWorldwithNana", type: "Video" },
+          { title: "Official Documentation & Guides", url: "https://docs.docker.com", type: "Documentation" },
+          { title: "Roadmap.sh - DevOps & Cloud Interactive Roadmap", url: "https://roadmap.sh/devops", type: "Practice" },
         ],
         isCompleted: false,
       },
@@ -1136,19 +1207,21 @@ export function generateSmartLearningRoadmap(
         currentLevel: "Beginner",
         targetLevel: "Proficient",
         topics: [
-          `Service decomposition, decoupling, and bounded contexts for ${week2Skill}`,
-          "RESTful APIs vs event-driven messaging architectures",
+          `Service decomposition and API architecture for ${week2Skill}`,
+          "RESTful APIs vs event-driven asynchronous messaging (Kafka / RabbitMQ)",
           "Centralized logging, distributed tracing, and health metrics",
           "Graceful degradation, retries, and circuit breaker patterns",
         ],
         practiceTasks: [
-          `Implement a decoupled service communicating via ${week2Skill}`,
-          "Build rate-limiting and authentication middleware",
-          "Simulate service latency and test error recovery behavior",
+          `Implement a decoupled microservice communicating via ${week2Skill}`,
+          "Build rate-limiting (Token Bucket) and JWT authentication middleware",
+          "Simulate service latency and benchmark error recovery behavior",
         ],
         resources: [
-          { title: "Microservices Architecture Patterns", url: "https://microservices.io", type: "Documentation" },
-          { title: "Designing Resilient Distributed Systems", url: "https://martinfowler.com", type: "Article" },
+          { title: "Hussein Nasser - Backend Engineering & Protocols (YouTube)", url: "https://www.youtube.com/@hnasr", type: "Video" },
+          { title: "Full Stack Open - University of Helsinki (Free Course)", url: "https://fullstackopen.com/en/", type: "Course" },
+          { title: "Microservices Architecture Patterns & Guide", url: "https://microservices.io", type: "Documentation" },
+          { title: "Designing Resilient Distributed Systems (Martin Fowler)", url: "https://martinfowler.com", type: "Article" },
         ],
         isCompleted: false,
       },
@@ -1159,19 +1232,21 @@ export function generateSmartLearningRoadmap(
         currentLevel: "Intermediate",
         targetLevel: "Advanced",
         topics: [
-          "PostgreSQL B-Tree, Hash, and GIN index internals and query planner",
-          "Analyzing slow queries with EXPLAIN ANALYZE and identifying sequential scans",
-          "Connection pooling, read replicas, and caching strategies (Redis)",
-          "Data modeling and normalization vs denormalization tradeoffs",
+          "PostgreSQL B-Tree, Hash, and GIN index internals and query execution plans",
+          "Analyzing slow queries with EXPLAIN ANALYZE and removing full-table scans",
+          "Connection pooling, read replicas, and caching layers (Redis)",
+          "Data modeling and normalization vs denormalization trade-offs",
         ],
         practiceTasks: [
           "Write optimized SQL queries with composite indexes and CTEs",
           "Benchmark query response times before and after index creation",
-          "Implement Redis caching for high-read database endpoints",
+          "Implement Redis caching with TTL for high-throughput database endpoints",
         ],
         resources: [
-          { title: "Use The Index, Luke! (SQL Indexing Guide)", url: "https://use-the-index-luke.com", type: "Documentation" },
-          { title: "PostgreSQL Official Performance Guide", url: "https://postgresql.org", type: "Article" },
+          { title: "freeCodeCamp - Relational Databases & SQL (YouTube)", url: "https://www.youtube.com/c/Freecodecamp", type: "Video" },
+          { title: "Use The Index, Luke! - Complete Database Indexing Guide", url: "https://use-the-index-luke.com", type: "Documentation" },
+          { title: "SQLBolt - Interactive SQL Lessons & Exercises", url: "https://sqlbolt.com", type: "Practice" },
+          { title: "PostgreSQL Official Performance & Query Tuning Guide", url: "https://postgresql.org", type: "Documentation" },
         ],
         isCompleted: false,
       },
@@ -1182,19 +1257,21 @@ export function generateSmartLearningRoadmap(
         currentLevel: "Intermediate",
         targetLevel: "Advanced",
         topics: [
-          "Structuring technical answers clearly with context, key actions, and measurable results",
-          "Eliminating filler words through intentional pausing techniques",
-          "System design fundamentals (Load Balancing, Caching, Sharding)",
-          "Timed live algorithmic coding and edge case validation",
+          "System design fundamentals: Load balancing, CDN caching, database sharding, and CAP theorem",
+          "Structuring STAR behavioral interview answers with quantifiable metrics",
+          "Timed algorithmic coding, edge-case analysis, and Big-O optimization",
+          "Handling tough interview follow-up questions and system scalability trade-offs",
         ],
         practiceTasks: [
-          "Record 3 full video mock interview sessions on CareerGrowth AI",
-          "Prepare 5 project experience stories with measurable business metrics",
-          "Practice 5 LeetCode medium algorithmic challenges under a 20-minute timer",
+          "Complete 3 full mock interview simulations on CareerGrowth AI studio",
+          "Solve 10 LeetCode Medium challenges under a 20-minute timer",
+          "Prepare 5 STAR experience stories covering deadlines, code reviews, and production incidents",
         ],
         resources: [
-          { title: "System Design Primer by Donne Martin", url: "https://github.com/donnemartin/system-design-primer", type: "Practice" },
-          { title: "Interview Communication & Practice Guide", url: "https://careergrowth.ai", type: "Practice" },
+          { title: "ByteByteGo - System Design Fundamentals (YouTube)", url: "https://www.youtube.com/@ByteByteGo", type: "Video" },
+          { title: "NeetCode - Algorithmic Coding Patterns & LeetCode (YouTube)", url: "https://www.youtube.com/@NeetCode", type: "Video" },
+          { title: "System Design Primer by Donne Martin (GitHub)", url: "https://github.com/donnemartin/system-design-primer", type: "Practice" },
+          { title: "Harvard CS50 - Introduction to Computer Science (Free Course)", url: "https://cs50.harvard.edu", type: "Course" },
         ],
         isCompleted: false,
       },

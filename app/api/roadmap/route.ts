@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUser } from "@/lib/auth/userHelper";
-import { generateLearningRoadmap, RoadmapSynthesisContext } from "@/lib/ai/aiProvider";
+import { generateLearningRoadmap, matchJobDescription, RoadmapSynthesisContext } from "@/lib/ai/aiProvider";
 import prisma from "@/lib/db/prisma";
 
-// Helper to gather all candidate diagnostic gaps across Resume, Job Match, and Mock Interview
+// Helper to gather candidate diagnostic gaps across Resume, Job Match, and Mock Interview
 async function gatherCandidateDiagnosticContext(
   userId: string,
-  preferredRole?: string
+  preferredRole?: string,
+  customJdText?: string
 ): Promise<{ context: RoadmapSynthesisContext; hasDiagnosticData: boolean; resumeId?: string; interviewId?: string }> {
   // 1. Fetch latest Resume
   const latestResume = await prisma.resume.findFirst({
@@ -29,14 +30,26 @@ async function gatherCandidateDiagnosticContext(
     include: { rounds: { include: { questions: true } } },
   });
 
-  const hasDiagnosticData = Boolean(latestResume || latestJobMatch || latestInterview);
+  const hasDiagnosticData = Boolean(latestResume || latestJobMatch || latestInterview || customJdText);
 
-  // Extract missing skills from Job Match
+  // Extract missing skills
   const missingSkills: string[] = [];
-  if (latestJobMatch?.missingSkills) {
+
+  // If user provided a specific custom JD, analyze missing skills directly against resume!
+  if (customJdText && latestResume?.rawText) {
+    try {
+      const matchResult = await matchJobDescription(latestResume.rawText, customJdText);
+      if (matchResult.missingSkills && Array.isArray(matchResult.missingSkills)) {
+        missingSkills.push(...matchResult.missingSkills.map((s) => s.skill));
+      }
+    } catch {
+      // ignore
+    }
+  } else if (latestJobMatch?.missingSkills) {
     try {
       const parsed = JSON.parse(latestJobMatch.missingSkills as unknown as string);
       if (Array.isArray(parsed)) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         missingSkills.push(...parsed.map((item: any) => item.skill || String(item)));
       }
     } catch {
@@ -115,12 +128,11 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    // Do NOT auto-create anything on GET. If no roadmap is saved, return null/empty state.
     if (!roadmap) {
       return NextResponse.json({
         hasData: false,
         roadmap: null,
-        message: "No learning roadmap generated yet. Complete your Resume Analysis, Job Match, and Mock Interview to generate your roadmap.",
+        message: "No learning roadmap generated yet. Complete your Resume Analysis, Job Match, or enter a target Job Description to generate your roadmap.",
       });
     }
 
@@ -163,12 +175,28 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { targetRole, resumeId, interviewId } = await req.json();
+    const { targetRole, jobDescriptionText, resumeId, interviewId } = await req.json();
+
+    // If jobDescriptionText is provided, optionally save or update JobDescription in DB
+    if (jobDescriptionText && jobDescriptionText.trim().length > 10) {
+      await prisma.jobDescription.create({
+        data: {
+          userId: user.userId,
+          title: targetRole || "Target Software Engineer Role",
+          companyName: "Target Company",
+          rawText: jobDescriptionText.trim(),
+        },
+      });
+    }
 
     // Gather real candidate diagnostics from Database across Resume, Job Match, and Interview
-    const { context, resumeId: autoResumeId, interviewId: autoInterviewId } = await gatherCandidateDiagnosticContext(user.userId, targetRole);
+    const { context, resumeId: autoResumeId, interviewId: autoInterviewId } = await gatherCandidateDiagnosticContext(
+      user.userId,
+      targetRole,
+      jobDescriptionText
+    );
 
-    // Synthesize fresh roadmap with Groq AI
+    // Synthesize fresh roadmap with AI
     const generated = await generateLearningRoadmap(context);
 
     // Delete old roadmaps for this user so only the newly generated plan is active

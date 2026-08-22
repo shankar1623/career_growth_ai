@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Compass, Sparkles, Loader2, FileText, Target, Video, ArrowRight, RefreshCw } from "lucide-react";
+import { Compass, Sparkles, Loader2, FileText, Target, Video, ArrowRight, RefreshCw, Zap } from "lucide-react";
 import { RoadmapTimeline } from "@/components/roadmap/RoadmapTimeline";
 import { LearningRoadmapData } from "@/types";
 
@@ -10,6 +10,8 @@ export default function RoadmapPage() {
   const [roadmap, setRoadmap] = useState<LearningRoadmapData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [targetRole, setTargetRole] = useState("Full-Stack Software Engineer");
+  const [jobDescriptionText, setJobDescriptionText] = useState("");
 
   useEffect(() => {
     async function loadRoadmap() {
@@ -18,6 +20,9 @@ export default function RoadmapPage() {
         if (res.ok) {
           const data = await res.json();
           setRoadmap(data.roadmap || null);
+          if (data.roadmap?.targetRole) {
+            setTargetRole(data.roadmap.targetRole);
+          }
         }
       } catch (err) {
         console.error("Failed to load roadmap:", err);
@@ -34,7 +39,10 @@ export default function RoadmapPage() {
       const res = await fetch("/api/roadmap", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ targetRole: "Full-Stack Software Engineer" }),
+        body: JSON.stringify({
+          targetRole,
+          jobDescriptionText: jobDescriptionText.trim() || undefined,
+        }),
       });
       const data = await res.json();
       if (data.roadmap) {
@@ -68,12 +76,15 @@ export default function RoadmapPage() {
           Personalized Learning Roadmap
         </h1>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-          Targeted weekly skill milestones synthesized from your resume diagnostic, job description gap analysis, and mock interview performance.
+          Targeted weekly skill milestones synthesized from your resume diagnostic, job description gap analysis, and mock interview performance with free YouTube & course links.
         </p>
       </div>
 
       {roadmap ? (
-        <RoadmapTimeline initialRoadmap={roadmap} />
+        <RoadmapTimeline
+          initialRoadmap={roadmap}
+          onRoadmapUpdated={(updated) => setRoadmap(updated)}
+        />
       ) : (
         <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-8 md:p-12 text-center max-w-3xl mx-auto shadow-xs space-y-6 transition-colors">
           <div className="w-16 h-16 rounded-3xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto shadow-xs">
@@ -88,6 +99,41 @@ export default function RoadmapPage() {
               Your personalized roadmap is synthesized dynamically by <strong>Groq AI</strong> from your verified diagnostics:
               resume ATS gaps, target job requirements, and mock interview weak areas.
             </p>
+          </div>
+
+          {/* Quick Config Form */}
+          <div className="p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 text-left space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs font-bold text-slate-800 dark:text-white block mb-1">
+                  Target Role:
+                </label>
+                <select
+                  value={targetRole}
+                  onChange={(e) => setTargetRole(e.target.value)}
+                  className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 p-2.5 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                >
+                  <option value="Full-Stack Software Engineer">Full-Stack Software Engineer</option>
+                  <option value="Frontend Developer (React/TypeScript)">Frontend Developer (React/TypeScript)</option>
+                  <option value="Backend Developer (Node.js/SQL)">Backend Developer (Node.js/SQL)</option>
+                  <option value="Python / Data Engineer">Python / Data Engineer</option>
+                  <option value="DevOps & Cloud Engineer">DevOps & Cloud Engineer</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-slate-800 dark:text-white block mb-1">
+                  Target Job Description (Optional):
+                </label>
+                <textarea
+                  value={jobDescriptionText}
+                  onChange={(e) => setJobDescriptionText(e.target.value)}
+                  placeholder="Paste JD requirements to calculate exact missing skills..."
+                  rows={2}
+                  className="w-full text-xs rounded-xl border border-slate-200 dark:border-slate-700 p-2.5 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Action Steps Grid */}
@@ -166,7 +212,7 @@ export default function RoadmapPage() {
                 </>
               ) : (
                 <>
-                  <RefreshCw className="w-4 h-4" />
+                  <Zap className="w-4 h-4" />
                   <span>Synthesize My Roadmap from Diagnostics</span>
                 </>
               )}

@@ -129,22 +129,42 @@ export function RoadmapItemCard({ item, onToggleComplete }: RoadmapItemCardProps
         {item.resources && item.resources.length > 0 && (
           <div>
             <span className="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-[11px] block mb-2">
-              Recommended Free Learning Resources
+              Free Learning Resources (YouTube, Courses & Docs)
             </span>
-            <div className="flex flex-wrap gap-2">
-              {item.resources.map((res, idx) => (
-                <a
-                  key={idx}
-                  href={res.url || "#"}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors shadow-xs"
-                >
-                  <BookOpen className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
-                  <span className="font-medium">{res.title}</span>
-                  <ExternalLink className="w-3 h-3 text-slate-400 dark:text-slate-500" />
-                </a>
-              ))}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {item.resources.map((res, idx) => {
+                const isVideo = res.type === "Video" || res.title.toLowerCase().includes("youtube");
+                const isCourse = res.type === "Course" || res.title.toLowerCase().includes("course");
+                const isDoc = res.type === "Documentation" || res.title.toLowerCase().includes("doc");
+                
+                return (
+                  <a
+                    key={idx}
+                    href={res.url || "#"}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-2.5 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-xs transition-all flex items-center justify-between gap-2 group"
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold shrink-0 ${
+                        isVideo
+                          ? "bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
+                          : isCourse
+                          ? "bg-blue-100 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
+                          : isDoc
+                          ? "bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                          : "bg-purple-100 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800"
+                      }`}>
+                        {isVideo ? "YouTube" : isCourse ? "Free Course" : isDoc ? "Docs" : "Practice"}
+                      </span>
+                      <span className="font-semibold text-xs text-slate-800 dark:text-slate-200 truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        {res.title}
+                      </span>
+                    </div>
+                    <ExternalLink className="w-3.5 h-3.5 text-slate-400 group-hover:text-indigo-600 shrink-0 transition-colors" />
+                  </a>
+                );
+              })}
             </div>
           </div>
         )}

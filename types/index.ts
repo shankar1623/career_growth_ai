@@ -164,10 +164,12 @@ export interface InterviewFinalEvaluation {
   improvements: ImprovementItem[];
 }
 
+export type RoadmapResourceType = 'Video' | 'Course' | 'Documentation' | 'Practice' | 'Article';
+
 export interface RoadmapResource {
   title: string;
   url?: string;
-  type: 'Video' | 'Documentation' | 'Practice' | 'Article';
+  type: RoadmapResourceType;
 }
 
 export interface RoadmapItemData {
