@@ -247,8 +247,10 @@ export async function generateInterviewQuestions(
   jdText: string = ""
 ): Promise<InterviewRoundData[]> {
   try {
+    const sessionSeed = Math.random().toString(36).substring(2, 9);
     const prompt = `You are a Principal Tech Hiring Manager and Interviewer.
-Generate an authentic, highly customized 5-round mock interview tailored specifically to the candidate's target role, seniority level, and actual resume background.
+Generate a fresh, unique, and highly customized 5-round mock interview tailored specifically to the candidate's target role, seniority level, and actual resume background.
+Random Session Seed: ${sessionSeed} (Ensure varied, distinct questions every generation even for the same role).
 
 Target Role: ${role}
 Seniority / Experience Level: ${experienceLevel}

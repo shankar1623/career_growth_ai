@@ -1,5 +1,5 @@
 // Groq Cloud Ultra-Fast AI Integration (Free API)
-// Supported models: qwen/qwen3.6-27b, openai/gpt-oss-120b, openai/gpt-oss-20b
+// Supported fast models: openai/gpt-oss-120b, openai/gpt-oss-20b, groq/compound-mini
 
 export function extractJSONFromText(text: string): string | null {
   if (!text) return null;
@@ -53,42 +53,53 @@ export async function callGroqAPI(prompt: string, apiKey?: string): Promise<stri
   const key = apiKey || process.env.GROQ_API_KEY;
   if (!key) return null;
 
-  const model = process.env.GROQ_MODEL || "qwen/qwen3.6-27b";
+  const candidateModels = [
+    process.env.GROQ_MODEL || "openai/gpt-oss-120b",
+    "openai/gpt-oss-120b",
+    "openai/gpt-oss-20b",
+    "groq/compound-mini",
+  ];
 
-  try {
-    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${key}`,
-      },
-      body: JSON.stringify({
-        model,
-        messages: [
-          {
-            role: "system",
-            content: "You are an expert career and technical interview AI. Return strictly valid, parseable JSON only. Do not output conversational text, thinking steps, markdown descriptions, or backticks.",
-          },
-          { role: "user", content: prompt },
-        ],
-        temperature: 0.1,
-      }),
-      signal: AbortSignal.timeout(35000),
-    });
+  const uniqueModels = [...new Set(candidateModels)];
 
-    if (!response.ok) {
-      console.warn("Groq API error:", response.status, await response.text());
-      return null;
+  for (const model of uniqueModels) {
+    try {
+      const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${key}`,
+        },
+        body: JSON.stringify({
+          model,
+          messages: [
+            {
+              role: "system",
+              content: "You are an expert career and technical interview AI. Return strictly valid, parseable JSON only. Do not output conversational text, thinking steps, markdown descriptions, or backticks.",
+            },
+            { role: "user", content: prompt },
+          ],
+          temperature: 0.7,
+        }),
+        signal: AbortSignal.timeout(30000),
+      });
+
+      if (!response.ok) {
+        console.warn(`Groq API (${model}) error:`, response.status);
+        continue;
+      }
+
+      const data = await response.json();
+      const content = data?.choices?.[0]?.message?.content || null;
+
+      if (content) {
+        const extracted = extractJSONFromText(content);
+        if (extracted) return extracted;
+      }
+    } catch (error) {
+      console.warn(`Groq fetch error on model ${model}:`, error);
     }
-
-    const data = await response.json();
-    const content = data?.choices?.[0]?.message?.content || null;
-
-    if (!content) return null;
-
-    return extractJSONFromText(content);
-  } catch (error) {
-    console.warn("Groq fetch error:", error);
-    return null;
   }
+
+  return null;
 }

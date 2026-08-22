@@ -499,11 +499,11 @@ export function generateSmartInterviewQuestions(
     ? detectedTech.slice(0, 3).map(t => t.charAt(0).toUpperCase() + t.slice(1)).join(", ")
     : null;
 
-  // Detect primary domain
-  const isFrontend = roleLower.includes("frontend") || roleLower.includes("react") || roleLower.includes("ui");
-  const isBackend = roleLower.includes("backend") || roleLower.includes("node") || roleLower.includes("sql") || roleLower.includes("java");
-  const isData = roleLower.includes("data") || roleLower.includes("python") || roleLower.includes("ml") || roleLower.includes("ai");
-  const isDevOps = roleLower.includes("devops") || roleLower.includes("cloud") || roleLower.includes("aws") || roleLower.includes("infra");
+  // Detect primary domain with robust regex / hyphens
+  const isFrontend = roleLower.includes("frontend") || roleLower.includes("front-end") || roleLower.includes("react") || roleLower.includes("ui") || roleLower.includes("web") || roleLower.includes("vue") || roleLower.includes("next");
+  const isBackend = roleLower.includes("backend") || roleLower.includes("back-end") || roleLower.includes("node") || roleLower.includes("sql") || roleLower.includes("java") || roleLower.includes("golang") || roleLower.includes("api");
+  const isData = roleLower.includes("data") || roleLower.includes("python") || roleLower.includes("ml") || roleLower.includes("ai") || roleLower.includes("analyst");
+  const isDevOps = roleLower.includes("devops") || roleLower.includes("dev-ops") || roleLower.includes("cloud") || roleLower.includes("aws") || roleLower.includes("infra") || roleLower.includes("sre") || roleLower.includes("docker");
 
   // Round 1: Self Introduction
   const round1: InterviewRoundData = {
@@ -539,30 +539,30 @@ export function generateSmartInterviewQuestions(
     ],
   };
 
-  // Round 2: Resume Deep-Dive
-  let r2q1Text = "";
-  let r2q1Category = "Project Architecture";
-  let r2q2Text = "";
+  // Round 2: Resume Deep-Dive (Dynamic Randomized Pool)
+  const resumeQuestionsPool = topTechString
+    ? [
+        {
+          q1: `In your resume, you highlighted working with ${topTechString}. Can you walk me through the architecture of your most challenging project, explaining how you structured the components, data models, and API integrations?`,
+          q2: `Looking back at that project built with ${detectedTech[0] ? detectedTech[0].toUpperCase() : "your tech stack"}, what was the most difficult production bug, state synchronization issue, or performance bottleneck you diagnosed, and how did you resolve it?`,
+        },
+        {
+          q1: `Regarding your experience with ${topTechString}, how did you approach automated testing, continuous integration, and verifying edge-case stability before deploying to production?`,
+          q2: `If you were tasked with redesigning your ${topTechString} project from scratch today to handle 10x higher user concurrency, what architectural bottlenecks would you re-engineer first?`,
+        },
+      ]
+    : [
+        {
+          q1: `Walk me through the most technically complex project listed on your resume. What was the core problem, what was your role, and what architectural decisions did you make?`,
+          q2: `Describe a difficult technical bug or performance bottleneck you encountered in one of your projects. How did you diagnose it, what tools did you use, and how did you resolve it?`,
+        },
+        {
+          q1: `Describe a feature in your past projects where you had to integrate third-party APIs or external data services. How did you handle API latency, timeouts, and rate limits?`,
+          q2: `Can you discuss a time when you had to optimize resource consumption (CPU, memory, or database queries) in one of your recent applications?`,
+        },
+      ];
 
-  if (topTechString) {
-    r2q1Text = `In your resume, you highlighted working with ${topTechString}. Can you walk me through the architecture of your most challenging project, explaining how you structured the components, data models, and API integrations?`;
-    r2q2Text = `Looking back at that project built with ${detectedTech[0] ? detectedTech[0].toUpperCase() : "your tech stack"}, what was the most difficult production bug, state synchronization issue, or performance bottleneck you diagnosed, and how did you resolve it?`;
-  } else if (isFrontend) {
-    r2q1Text = `Can you walk me through the architecture of a complex web application you've built? How did you design the component hierarchy, manage client state, and optimize rendering performance?`;
-    r2q2Text = `Describe a challenging frontend performance issue or responsive layout bug you tackled. What browser profiling tools did you use to identify and resolve the bottleneck?`;
-  } else if (isBackend) {
-    r2q1Text = `Walk me through the backend architecture of a high-throughput service or API you engineered. How did you design the database schemas, handle authentication, and structure endpoints?`;
-    r2q2Text = `Tell me about a time you diagnosed a severe database query slowdown, deadlock, or API timeout under high load. What was the root cause and how did you resolve it?`;
-  } else if (isData) {
-    r2q1Text = `Can you walk me through a data pipeline or analytics workflow you developed? How did you approach data ingestion, schema validation, and pipeline reliability?`;
-    r2q2Text = `Describe a complex data transformation or memory efficiency challenge you encountered in Python. How did you optimize processing times and memory footprint?`;
-  } else if (isDevOps) {
-    r2q1Text = `Walk me through a production CI/CD deployment pipeline or cloud infrastructure you designed. What tools did you use for automated testing, containerization, and release management?`;
-    r2q2Text = `Describe an unexpected production outage or deployment rollback scenario you resolved. How did you diagnose the issue and what safeguards did you put in place?`;
-  } else {
-    r2q1Text = `Walk me through the most technically complex project listed on your resume. What was the core problem, what was your role, and what architectural decisions did you make?`;
-    r2q2Text = `Describe a difficult technical bug or performance bottleneck you encountered in one of your projects. How did you diagnose it, what tools did you use, and how did you resolve it?`;
-  }
+  const selectedR2 = resumeQuestionsPool[Math.floor(Math.random() * resumeQuestionsPool.length)];
 
   const round2: InterviewRoundData = {
     roundNumber: 2,
@@ -573,8 +573,8 @@ export function generateSmartInterviewQuestions(
     questions: [
       {
         orderIndex: 1,
-        questionText: r2q1Text,
-        category: r2q1Category,
+        questionText: selectedR2.q1,
+        category: "Project Architecture",
         difficulty: "Medium",
         idealAnswerPoints: [
           "Clear problem statement and technical requirements",
@@ -585,7 +585,7 @@ export function generateSmartInterviewQuestions(
       },
       {
         orderIndex: 2,
-        questionText: r2q2Text,
+        questionText: selectedR2.q2,
         category: "Debugging & Troubleshooting",
         difficulty: "Medium",
         idealAnswerPoints: [
@@ -598,117 +598,253 @@ export function generateSmartInterviewQuestions(
     ],
   };
 
-  // Round 3: Technical Round (Tailored to Role)
-  let r3q1: { text: string; category: string; points: string[] };
-  let r3q2: { text: string; category: string; points: string[] };
+  // Round 3: Technical Round (Randomized Pool per Role)
+  interface TechQPair {
+    q1: { text: string; category: string; points: string[] };
+    q2: { text: string; category: string; points: string[] };
+  }
+
+  let technicalPool: TechQPair[];
 
   if (isFrontend) {
-    r3q1 = {
-      text: `Can you explain React's rendering lifecycle, the Virtual DOM reconciliation algorithm (Fiber), and how React 19 Server Components differ from traditional Client Components in terms of bundle size and data fetching?`,
-      category: "React Architecture & Reconciliation",
-      points: [
-        "Reconciliation algorithm and key prop purpose in lists",
-        "Server Components execute on server with zero bundle impact",
-        "Client Components for interactivity and browser hooks",
-        "Practical performance trade-offs (Hydration vs SSR)",
-      ],
-    };
-    r3q2 = {
-      text: `How do you diagnose and optimize Core Web Vitals (Largest Contentful Paint, Interaction to Next Paint, Cumulative Layout Shift) on a high-traffic web application?`,
-      category: "Frontend Web Performance",
-      points: [
-        "LCP optimizations: Image preloading, critical CSS, CDN delivery",
-        "INP optimizations: Debouncing, web workers, yielding to main thread",
-        "CLS optimizations: Explicit image dimensions, font display swap",
-        "Code-splitting with dynamic imports",
-      ],
-    };
+    technicalPool = [
+      {
+        q1: {
+          text: `Can you explain React's rendering lifecycle, the Virtual DOM reconciliation algorithm (Fiber), and how React 19 Server Components differ from traditional Client Components in terms of bundle size and data fetching?`,
+          category: "React Architecture & Reconciliation",
+          points: [
+            "Reconciliation algorithm and key prop purpose in lists",
+            "Server Components execute on server with zero bundle impact",
+            "Client Components for interactivity and browser hooks",
+            "Practical performance trade-offs (Hydration vs SSR)",
+          ],
+        },
+        q2: {
+          text: `How do you diagnose and optimize Core Web Vitals (Largest Contentful Paint, Interaction to Next Paint, Cumulative Layout Shift) on a high-traffic web application?`,
+          category: "Frontend Web Performance",
+          points: [
+            "LCP optimizations: Image preloading, critical CSS, CDN delivery",
+            "INP optimizations: Debouncing, web workers, yielding to main thread",
+            "CLS optimizations: Explicit image dimensions, font display swap",
+            "Code-splitting with dynamic imports",
+          ],
+        },
+      },
+      {
+        q1: {
+          text: `How do you approach global state management in modern frontend applications? When would you choose React Context vs Zustand / Redux Toolkit vs Server State (TanStack Query / SWR)?`,
+          category: "Frontend State Management",
+          points: [
+            "Context re-render performance implications across deeply nested trees",
+            "Zustand selective subscriptions with atomic store slices",
+            "Server state caching, stale-while-revalidate, and optimistic updates",
+            "Separation of transient UI state from remote asynchronous data",
+          ],
+        },
+        q2: {
+          text: `Explain how the browser event loop handles microtasks (Promises, queueMicrotask) vs macrotasks (setTimeout, requestAnimationFrame, UI events). How can long-running JavaScript freeze the main UI thread?`,
+          category: "Browser Concurrency & Event Loop",
+          points: [
+            "Call stack execution and microtask draining before next render frame",
+            "requestAnimationFrame scheduling aligned with display refresh rate",
+            "Web Workers for offloading intensive computation from main thread",
+            "Using React concurrent features (useTransition, useDeferredValue)",
+          ],
+        },
+      },
+    ];
   } else if (isBackend) {
-    r3q1 = {
-      text: `Can you explain how relational database indexing (B-trees) works under the hood, how compound indexes are scanned, and how you would diagnose an unindexed slow query in PostgreSQL or MySQL?`,
-      category: "Database Indexing & Query Tuning",
-      points: [
-        "B-tree index structure and O(log N) lookup complexity",
-        "Left-most prefix rule for compound indexes",
-        "Using EXPLAIN ANALYZE to identify sequential table scans",
-        "Trade-offs of index write overhead on INSERT/UPDATE",
-      ],
-    };
-    r3q2 = {
-      text: `How do you design an idempotent RESTful API payment or checkout endpoint that guarantees zero duplicate charges even under network retries and high concurrency?`,
-      category: "Distributed Systems & Idempotency",
-      points: [
-        "Idempotency keys stored in Redis or database with TTL",
-        "Database transactions (ACID) with row-level locking or optimistic locking",
-        "Proper HTTP status codes (200, 201, 409 Conflict)",
-        "Dead-letter queues and atomic operations",
-      ],
-    };
+    technicalPool = [
+      {
+        q1: {
+          text: `Can you explain how relational database indexing (B-trees) works under the hood, how compound indexes are scanned, and how you would diagnose an unindexed slow query in PostgreSQL or MySQL?`,
+          category: "Database Indexing & Query Tuning",
+          points: [
+            "B-tree index structure and O(log N) lookup complexity",
+            "Left-most prefix rule for compound indexes",
+            "Using EXPLAIN ANALYZE to identify sequential table scans",
+            "Trade-offs of index write overhead on INSERT/UPDATE",
+          ],
+        },
+        q2: {
+          text: `How do you design an idempotent RESTful API payment or checkout endpoint that guarantees zero duplicate charges even under network retries and high concurrency?`,
+          category: "Distributed Systems & Idempotency",
+          points: [
+            "Idempotency keys stored in Redis or database with TTL",
+            "Database transactions (ACID) with row-level locking or optimistic locking",
+            "Proper HTTP status codes (200, 201, 409 Conflict)",
+            "Dead-letter queues and atomic operations",
+          ],
+        },
+      },
+      {
+        q1: {
+          text: `How do you handle database connection pooling, read replicas, and caching strategies (Redis Cache-Aside vs Write-Through) in a backend system receiving 10,000 requests per second?`,
+          category: "Backend Scalability & Caching",
+          points: [
+            "Connection pool exhaustion prevention (PgBouncer, max pool size)",
+            "Cache-aside pattern with TTL and cache invalidation strategies",
+            "Mitigating cache stampede / thundering herd with distributed locks",
+            "Routing read queries to replicas and write queries to primary",
+          ],
+        },
+        q2: {
+          text: `Explain the differences between synchronous REST APIs, gRPC, and asynchronous message brokers (Kafka / RabbitMQ). When should an event-driven architecture be chosen over request-response?`,
+          category: "System Architecture & Messaging",
+          points: [
+            "gRPC binary protobuf serialization and HTTP/2 multiplexing",
+            "Kafka append-only partition log vs RabbitMQ AMQP queue model",
+            "Decoupling microservices and handling traffic spikes with asynchronous consumers",
+            "Eventual consistency and outbox pattern for reliable message delivery",
+          ],
+        },
+      },
+    ];
   } else if (isData) {
-    r3q1 = {
-      text: `In Python, can you explain the performance difference between vectorized operations in NumPy/Pandas versus native Python for-loops? How does memory allocation and the Global Interpreter Lock (GIL) play into this?`,
-      category: "Python Vectorization & Memory",
-      points: [
-        "C-level continuous memory buffers in NumPy arrays",
-        "Vectorized SIMD instruction execution without Python bytecode overhead",
-        "GIL impact on CPU-bound multi-threading vs multiprocessing",
-        "Generator iterators for streaming large datasets without memory blowup",
-      ],
-    };
-    r3q2 = {
-      text: `How would you architect a fault-tolerant ETL pipeline that processes millions of incoming events daily, handles schema drift, and ensures exactly-once or at-least-once delivery?`,
-      category: "Data Pipelines & Streaming",
-      points: [
-        "Message broker buffering (Kafka/RabbitMQ)",
-        "Staging tables and schema validation",
-        "Idempotent data sink loading and deduplication",
-        "Monitoring, alerting, and automated backfill retries",
-      ],
-    };
+    technicalPool = [
+      {
+        q1: {
+          text: `In Python, can you explain the performance difference between vectorized operations in NumPy/Pandas versus native Python for-loops? How does memory allocation and the Global Interpreter Lock (GIL) play into this?`,
+          category: "Python Vectorization & Memory",
+          points: [
+            "C-level continuous memory buffers in NumPy arrays",
+            "Vectorized SIMD instruction execution without Python bytecode overhead",
+            "GIL impact on CPU-bound multi-threading vs multiprocessing",
+            "Generator iterators for streaming large datasets without memory blowup",
+          ],
+        },
+        q2: {
+          text: `How would you architect a fault-tolerant ETL pipeline that processes millions of incoming events daily, handles schema drift, and ensures exactly-once or at-least-once delivery?`,
+          category: "Data Pipelines & Streaming",
+          points: [
+            "Message broker buffering (Kafka/RabbitMQ)",
+            "Staging tables and schema validation",
+            "Idempotent data sink loading and deduplication",
+            "Monitoring, alerting, and automated backfill retries",
+          ],
+        },
+      },
+      {
+        q1: {
+          text: `Explain how distributed data processing frameworks like Apache Spark or Polars achieve high performance. How does lazy evaluation, query optimization (Catalyst), and partitioning affect compute speed?`,
+          category: "Big Data & Distributed Compute",
+          points: [
+            "Directed Acyclic Graph (DAG) execution plan generation",
+            "Predicate pushdown and projection pruning before execution",
+            "Minimizing expensive data shuffling across cluster nodes",
+            "Memory spilling management and partition sizing",
+          ],
+        },
+        q2: {
+          text: `How do you design a robust data quality and validation pipeline (using tools like Great Expectations or Pydantic) to catch corrupted or missing records before writing to a production data warehouse?`,
+          category: "Data Quality & Validation",
+          points: [
+            "Automated schema validation on ingestion",
+            "Null-check and anomaly detection assertions",
+            "Quarantine dead-letter queues for corrupted records",
+            "Audit logging and pipeline telemetry dashboards",
+          ],
+        },
+      },
+    ];
   } else if (isDevOps) {
-    r3q1 = {
-      text: `Can you explain the key architectural differences between Docker containers and virtual machines? How do Linux cgroups, namespaces, and union file systems isolate processes?`,
-      category: "Containerization & Linux Internals",
-      points: [
-        "Shared host kernel vs hypervisor virtualization layer",
-        "cgroups for resource limits (CPU/Memory) and namespaces for isolation",
-        "Multi-stage Docker builds to minimize attack surface and image size",
-        "Non-root container security best practices",
-      ],
-    };
-    r3q2 = {
-      text: `How do you implement a zero-downtime Blue-Green or Canary deployment strategy in Kubernetes or AWS, including automated health checks, metric rollback gates, and database schema migrations?`,
-      category: "CI/CD & Cloud Deployments",
-      points: [
-        "Traffic shifting via Ingress / Load Balancer routing",
-        "Readiness and Liveness probes for container health",
-        "Automated rollback triggered by error rate thresholds",
-        "Backward-compatible database schema migrations (Expand and Contract pattern)",
-      ],
-    };
+    technicalPool = [
+      {
+        q1: {
+          text: `Can you explain the key architectural differences between Docker containers and virtual machines? How do Linux cgroups, namespaces, and union file systems isolate processes?`,
+          category: "Containerization & Linux Internals",
+          points: [
+            "Shared host kernel vs hypervisor virtualization layer",
+            "cgroups for resource limits (CPU/Memory) and namespaces for isolation",
+            "Multi-stage Docker builds to minimize attack surface and image size",
+            "Non-root container security best practices",
+          ],
+        },
+        q2: {
+          text: `How do you implement a zero-downtime Blue-Green or Canary deployment strategy in Kubernetes or AWS, including automated health checks, metric rollback gates, and database schema migrations?`,
+          category: "CI/CD & Cloud Deployments",
+          points: [
+            "Traffic shifting via Ingress / Load Balancer routing",
+            "Readiness and Liveness probes for container health",
+            "Automated rollback triggered by error rate thresholds",
+            "Backward-compatible database schema migrations (Expand and Contract pattern)",
+          ],
+        },
+      },
+      {
+        q1: {
+          text: `How do you structure Infrastructure as Code (Terraform) for multi-environment cloud deployments (Dev, Staging, Prod)? How do you manage state locks, remote backends, and sensitive secrets securely?`,
+          category: "Infrastructure as Code & Security",
+          points: [
+            "Terraform modules with environment-specific tfvars",
+            "Remote S3/GCS backend with DynamoDB state locking",
+            "Secrets management via AWS Secrets Manager or HashiCorp Vault",
+            "Least privilege IAM role policies and drift detection",
+          ],
+        },
+        q2: {
+          text: `Describe your approach to implementing centralized observability (Prometheus, Grafana, OpenTelemetry, ELK). How do you define meaningful SLIs, SLOs, and alert thresholds to avoid alert fatigue?`,
+          category: "Observability & Site Reliability",
+          points: [
+            "Four Golden Signals: Latency, Traffic, Errors, and Saturation",
+            "Distributed tracing across microservices with trace and span IDs",
+            "Burn-rate alerts based on SLO budget consumption",
+            "Automated runbooks attached to alert notifications",
+          ],
+        },
+      },
+    ];
   } else {
-    // Full-Stack Default
-    r3q1 = {
-      text: `Can you explain the difference between synchronous and asynchronous execution in Node.js/JavaScript? How does the Event Loop, Microtask Queue, and Macrotask Queue handle Promises versus setTimeout?`,
-      category: "Asynchronous Concurrency & Event Loop",
-      points: [
-        "Call stack and single-threaded execution model",
-        "Event loop tick cycle and Libuv thread pool",
-        "Promise resolution in Microtask queue before next Macrotask",
-        "Handling unhandled rejections and async/await error propagation",
-      ],
-    };
-    r3q2 = {
-      text: `How do you design a secure, production-ready RESTful API with JWT authentication, role-based access control, database indexing, rate limiting, and structured error handling?`,
-      category: "API Architecture & Security",
-      points: [
-        "Stateless JWT token verification with refresh token rotation",
-        "Input validation and sanitization (Zod/Joi)",
-        "Database indexing to avoid full-table scans",
-        "Rate limiting middleware (Token Bucket in Redis) and standard HTTP status codes",
-      ],
-    };
+    // Full-Stack Default (Randomized Pool)
+    technicalPool = [
+      {
+        q1: {
+          text: `Can you explain the difference between synchronous and asynchronous execution in Node.js/JavaScript? How does the Event Loop, Microtask Queue, and Macrotask Queue handle Promises versus setTimeout?`,
+          category: "Asynchronous Concurrency & Event Loop",
+          points: [
+            "Call stack and single-threaded execution model",
+            "Event loop tick cycle and Libuv thread pool",
+            "Promise resolution in Microtask queue before next Macrotask",
+            "Handling unhandled rejections and async/await error propagation",
+          ],
+        },
+        q2: {
+          text: `How do you design a secure, production-ready RESTful API with JWT authentication, role-based access control, database indexing, rate limiting, and structured error handling?`,
+          category: "API Architecture & Security",
+          points: [
+            "Stateless JWT token verification with refresh token rotation",
+            "Input validation and sanitization (Zod/Joi)",
+            "Database indexing to avoid full-table scans",
+            "Rate limiting middleware (Token Bucket in Redis) and standard HTTP status codes",
+          ],
+        },
+      },
+      {
+        q1: {
+          text: `How do you design an end-to-end full-stack feature involving real-time updates (WebSockets / Server-Sent Events), optimistic UI updates on the client, and transactional data persistence on the server?`,
+          category: "Full-Stack Real-Time Systems",
+          points: [
+            "WebSocket bidirectional channel vs SSE unidirectional streaming",
+            "Optimistic state rollback on network failure",
+            "Database transaction boundaries (ACID)",
+            "Handling network reconnects and message replay",
+          ],
+        },
+        q2: {
+          text: `What strategies do you use to optimize database performance in a full-stack application (e.g. solving N+1 query problems in Prisma/TypeORM, composite indexing, and connection pooling)?`,
+          category: "Full-Stack Data Optimization",
+          points: [
+            "Eager loading (include/join) vs lazy loading N+1 queries",
+            "Analyzing SQL queries with EXPLAIN ANALYZE",
+            "Connection pooling with PgBouncer",
+            "Server-side response caching with Redis",
+          ],
+        },
+      },
+    ];
   }
+
+  const selectedTech = technicalPool[Math.floor(Math.random() * technicalPool.length)];
 
   const round3: InterviewRoundData = {
     roundNumber: 3,
@@ -719,17 +855,17 @@ export function generateSmartInterviewQuestions(
     questions: [
       {
         orderIndex: 1,
-        questionText: r3q1.text,
-        category: r3q1.category,
+        questionText: selectedTech.q1.text,
+        category: selectedTech.q1.category,
         difficulty: "Medium",
-        idealAnswerPoints: r3q1.points,
+        idealAnswerPoints: selectedTech.q1.points,
       },
       {
         orderIndex: 2,
-        questionText: r3q2.text,
-        category: r3q2.category,
+        questionText: selectedTech.q2.text,
+        category: selectedTech.q2.category,
         difficulty: "Hard",
-        idealAnswerPoints: r3q2.points,
+        idealAnswerPoints: selectedTech.q2.points,
       },
     ],
   };
