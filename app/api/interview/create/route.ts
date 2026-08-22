@@ -10,7 +10,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { role = "Software Engineer", experienceLevel = "Entry / Mid Level", resumeId, jdId } = await req.json();
+    const {
+      role = "Full-Stack Software Engineer",
+      experienceLevel = "Entry / Mid Level",
+      resumeId,
+      jdId,
+      jobDescriptionText,
+    } = await req.json();
 
     let resumeText = "";
     let jdText = "";
@@ -29,7 +35,18 @@ export async function POST(req: NextRequest) {
       if (latestResume) resumeText = latestResume.rawText;
     }
 
-    if (jdId) {
+    if (jobDescriptionText && jobDescriptionText.trim().length > 10) {
+      jdText = jobDescriptionText.trim();
+      const createdJd = await prisma.jobDescription.create({
+        data: {
+          userId: user.userId,
+          title: role,
+          companyName: "Target Job",
+          rawText: jdText,
+        },
+      });
+      resolvedJdId = createdJd.id;
+    } else if (jdId) {
       const dbJD = await prisma.jobDescription.findFirst({
         where: { id: jdId, userId: user.userId },
       });
@@ -58,23 +75,21 @@ export async function POST(req: NextRequest) {
         targetRole: role,
         experienceLevel,
         interviewType: "FULL_5_ROUNDS",
-        status: "IN_PROGRESS",
-        currentRoundNumber: 1,
         rounds: {
           create: roundsData.map((round) => ({
             roundNumber: round.roundNumber,
             roundType: round.roundType,
             title: round.title,
             description: round.description,
-            status: round.roundNumber === 1 ? "IN_PROGRESS" : "PENDING",
+            status: "PENDING",
             questions: {
               create: round.questions.map((q) => ({
                 orderIndex: q.orderIndex,
                 questionText: q.questionText,
-                category: q.category || "General",
-                difficulty: q.difficulty || "Medium",
-                context: q.context || undefined,
-                idealAnswerPoints: q.idealAnswerPoints ? JSON.stringify(q.idealAnswerPoints) : null,
+                category: q.category,
+                difficulty: q.difficulty,
+                context: q.context,
+                idealAnswer: JSON.stringify(q.idealAnswerPoints || []),
               })),
             },
           })),
@@ -82,11 +97,17 @@ export async function POST(req: NextRequest) {
       },
       include: {
         rounds: {
-          include: {
-            questions: true,
-          },
+          include: { questions: true },
+          orderBy: { roundNumber: "asc" },
         },
       },
+    });
+
+    // Increment user progress
+    await prisma.userProgress.upsert({
+      where: { userId: user.userId },
+      update: { totalInterviews: { increment: 1 } },
+      create: { userId: user.userId, totalInterviews: 1 },
     });
 
     return NextResponse.json({
@@ -95,8 +116,8 @@ export async function POST(req: NextRequest) {
       interview,
     });
   } catch (error: unknown) {
-    console.error("Interview Create Route Error:", error);
-    const errMessage = error instanceof Error ? error.message : "Failed to create interview session.";
+    console.error("Create Interview Error:", error);
+    const errMessage = error instanceof Error ? error.message : "Failed to create mock interview session.";
     return NextResponse.json({ error: errMessage }, { status: 500 });
   }
 }
