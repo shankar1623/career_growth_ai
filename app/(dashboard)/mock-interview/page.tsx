@@ -13,7 +13,7 @@ import {
   UploadCloud,
   Briefcase,
   Target,
-  Sparkles,
+  AlertCircle,
 } from "lucide-react";
 
 interface SavedResume {
@@ -45,6 +45,7 @@ export default function MockInterviewSetupPage() {
   const [selectedResumeId, setSelectedResumeId] = useState<string>("");
   const [isLoadingResumes, setIsLoadingResumes] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadResumes() {
@@ -65,6 +66,7 @@ export default function MockInterviewSetupPage() {
   }, []);
 
   const handleStartInterview = async () => {
+    setErrorMessage(null);
     setIsCreating(true);
     const finalRole = isCustomRole ? (customRoleInput.trim() || "Software Engineer") : role;
 
@@ -81,11 +83,15 @@ export default function MockInterviewSetupPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to initialize interview");
+      if (!res.ok || !data.interviewId) {
+        throw new Error(data.error || "Failed to initialize interview session");
+      }
 
       router.push(`/interview/${data.interviewId}`);
-    } catch (err) {
-      console.error(err);
+    } catch (err: unknown) {
+      console.error("Start interview error:", err);
+      const msg = err instanceof Error ? err.message : "Failed to start interview.";
+      setErrorMessage(msg);
       setIsCreating(false);
     }
   };
@@ -105,6 +111,14 @@ export default function MockInterviewSetupPage() {
           Type any custom role or paste a Job Description. AI will generate 5 customized interview rounds tailored specifically to your resume and requirements.
         </p>
       </div>
+
+      {/* Error Alert */}
+      {errorMessage && (
+        <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-2xl flex items-center gap-3 text-xs text-rose-800 dark:text-rose-300">
+          <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
+          <span>{errorMessage}</span>
+        </div>
+      )}
 
       {/* Setup Form Card */}
       <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xs p-6 sm:p-8 space-y-6 transition-colors">
