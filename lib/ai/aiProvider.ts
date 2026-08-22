@@ -497,21 +497,37 @@ Return strictly valid JSON only matching this schema:
       "priority": "HIGH" | "MEDIUM" | "LOW",
       "currentLevel": "Beginner" | "Intermediate",
       "targetLevel": "Intermediate" | "Advanced" | "Proficient",
-      "topics": string[] (3-4 specific technical topics),
-      "practiceTasks": string[] (2-3 hands-on coding exercises),
       "resources": [
-        { "title": string, "url": string, "type": "Documentation" | "Article" | "Practice" }
+        { "title": "freeCodeCamp - [Skill] Full Course (YouTube)", "url": "https://www.youtube.com/c/Freecodecamp", "type": "Video" },
+        { "title": "Full Stack Open / Harvard CS50 (Free Course)", "url": "https://fullstackopen.com/en/", "type": "Course" },
+        { "title": "Official Documentation & API Reference", "url": "https://docs.docker.com", "type": "Documentation" },
+        { "title": "Roadmap.sh / LeetCode (Interactive Practice)", "url": "https://roadmap.sh", "type": "Practice" }
       ],
       "isCompleted": false
     }
   ]
 }
 
-Ensure all 4 weeks are included in the items array.`;
+Include rich free YouTube video courses and free tutorials for every single week in the resources array.`;
 
     const aiResponse = await executeAIPrompt(prompt);
     const parsed = extractJsonFromResponse<LearningRoadmapData>(aiResponse);
     if (parsed && Array.isArray(parsed.items) && parsed.items.length >= 4) {
+      // Ensure resources have valid YouTube URLs if type is Video
+      for (const item of parsed.items) {
+        if (!item.resources || !Array.isArray(item.resources) || item.resources.length === 0) {
+          item.resources = [
+            { title: `${item.skill} - Free Full Course (YouTube)`, url: `https://www.youtube.com/results?search_query=${encodeURIComponent(item.skill + " full course tutorial freecodecamp")}`, type: "Video" },
+            { title: `${item.skill} Official Documentation`, url: `https://www.google.com/search?q=${encodeURIComponent(item.skill + " official documentation")}`, type: "Documentation" },
+          ];
+        } else {
+          for (const res of item.resources) {
+            if (res.type === "Video" && (!res.url || res.url === "#")) {
+              res.url = `https://www.youtube.com/results?search_query=${encodeURIComponent(res.title || item.skill + " tutorial")}`;
+            }
+          }
+        }
+      }
       return parsed;
     }
   } catch (error) {
