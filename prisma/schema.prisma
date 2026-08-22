@@ -1,0 +1,330 @@
+// Prisma Schema for CareerGrowth AI
+// Supports Neon PostgreSQL and local PostgreSQL
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id               String            @id @default(cuid())
+  clerkId          String            @unique
+  email            String?
+  name             String?
+  imageUrl         String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  resumes          Resume[]
+  jobDescriptions  JobDescription[]
+  jobMatches       JobMatch[]
+  companies        Company[]
+  selfIntros       SelfIntroduction[]
+  interviews       Interview[]
+  roadmaps         LearningRoadmap[]
+  userProgress     UserProgress?
+
+  @@index([clerkId])
+}
+
+model Resume {
+  id               String                  @id @default(cuid())
+  userId           String
+  user             User                    @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
+  title            String                  @default("My Resume")
+  fileName         String?
+  fileSize         Int?
+  rawText          String                  @db.Text
+  overallScore     Int                     @default(0)
+  atsScore         Int                     @default(0)
+  contentScore     Int                     @default(0)
+  impactScore      Int                     @default(0)
+  skillsScore      Int                     @default(0)
+  experienceScore  Int                     @default(0)
+  projectsScore    Int                     @default(0)
+  formattingScore  Int                     @default(0)
+  grammarScore     Int                     @default(0)
+  topFixes         String?                 @db.Text // JSON Array of string fixes
+  parsedData       String?                 @db.Text // JSON with structured sections
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+
+  sections         ResumeSectionAnalysis[]
+  jobMatches       JobMatch[]
+  selfIntros       SelfIntroduction[]
+  interviews       Interview[]
+  roadmaps         LearningRoadmap[]
+
+  @@index([userId])
+}
+
+model ResumeSectionAnalysis {
+  id                   String   @id @default(cuid())
+  resumeId             String
+  resume               Resume   @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  sectionName          String
+  score                Int      @default(0)
+  strengths            String?  @db.Text // JSON Array
+  weaknesses           String?  @db.Text // JSON Array
+  problems             String?  @db.Text // JSON Array
+  atsConcerns          String?  @db.Text // JSON Array
+  grammarConcerns      String?  @db.Text // JSON Array
+  originalText         String   @db.Text
+  suggestedReplacement String   @db.Text
+  explanation          String   @db.Text
+  createdAt            DateTime @default(now())
+
+  @@index([resumeId])
+}
+
+model JobDescription {
+  id             String            @id @default(cuid())
+  userId         String
+  user           User              @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
+  title          String
+  companyName    String?
+  rawText        String            @db.Text
+  sourceUrl      String?
+  parsedSkills   String?           @db.Text // JSON Array
+  parsedKeywords String?           @db.Text // JSON Array
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  jobMatches     JobMatch[]
+  selfIntros     SelfIntroduction[]
+  interviews     Interview[]
+
+  @@index([userId])
+}
+
+model JobMatch {
+  id                    String         @id @default(cuid())
+  userId                String
+  user                  User           @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
+  resumeId              String
+  resume                Resume         @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  jobDescriptionId      String
+  jobDescription        JobDescription @relation(fields: [jobDescriptionId], references: [id], onDelete: Cascade)
+  overallMatch          Int            @default(0)
+  skillsMatch           Int            @default(0)
+  experienceMatch       Int            @default(0)
+  keywordMatch          Int            @default(0)
+  projectRelevance      Int            @default(0)
+  educationMatch        Int            @default(0)
+  responsibilitiesMatch Int            @default(0)
+  atsMatch              Int            @default(0)
+  strongMatches         String?        @db.Text // JSON Array of string skills
+  missingSkills         String?        @db.Text // JSON Array of object { skill, reason, whyToLearn, relevance }
+  missingKeywords       String?        @db.Text // JSON Array of object { keyword, context, importance }
+  recommendations       String?        @db.Text // JSON Array of strings
+  createdAt             DateTime       @default(now())
+
+  @@index([userId])
+  @@index([resumeId])
+  @@index([jobDescriptionId])
+}
+
+model Company {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
+  name        String
+  domain      String?
+  industry    String?
+  overview    String?  @db.Text
+  products    String?  @db.Text // JSON Array
+  mission     String?  @db.Text
+  culture     String?  @db.Text
+  sourceUrl   String?
+  isVerified  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([name])
+}
+
+model SelfIntroduction {
+  id               String          @id @default(cuid())
+  userId           String
+  user             User            @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
+  resumeId         String?
+  resume           Resume?         @relation(fields: [resumeId], references: [id], onDelete: SetNull)
+  jobDescriptionId String?
+  jobDescription   JobDescription? @relation(fields: [jobDescriptionId], references: [id], onDelete: SetNull)
+  targetRole       String?
+  companyName      String?
+  pitch30          String          @db.Text
+  pitch60          String          @db.Text
+  pitch90          String          @db.Text
+  whyItWorks       String          @db.Text
+  keyHighlights    String?         @db.Text // JSON Array
+  createdAt        DateTime        @default(now())
+
+  @@index([userId])
+}
+
+model Interview {
+  id                 String              @id @default(cuid())
+  userId             String
+  user               User                @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
+  resumeId           String?
+  resume             Resume?             @relation(fields: [resumeId], references: [id], onDelete: SetNull)
+  jobDescriptionId   String?
+  jobDescription     JobDescription?     @relation(fields: [jobDescriptionId], references: [id], onDelete: SetNull)
+  title              String              @default("Full Mock Interview")
+  targetRole         String              @default("Software Engineer")
+  experienceLevel    String              @default("Entry / Mid Level")
+  interviewType      String              @default("FULL_5_ROUNDS") // FULL_5_ROUNDS, TECHNICAL, BEHAVIORAL, CODING
+  status             String              @default("IN_PROGRESS") // IN_PROGRESS, COMPLETED, ABANDONED
+  currentRoundNumber Int                 @default(1)
+  overallScore       Int                 @default(0)
+  communicationScore Int                 @default(0)
+  technicalScore     Int                 @default(0)
+  problemSolvingScore Int                @default(0)
+  structureScore     Int                 @default(0)
+  resumeScore        Int                 @default(0)
+  codingScore        Int                 @default(0)
+  hrScore            Int                 @default(0)
+  summaryFeedback    String?             @db.Text
+  strengths          String?             @db.Text // JSON Array of strings
+  improvements       String?             @db.Text // JSON Array of { problem, whyItMatters, betterExample, howToPractice }
+  createdAt          DateTime            @default(now())
+  completedAt        DateTime?
+
+  rounds             InterviewRound[]
+  roadmaps           LearningRoadmap[]
+
+  @@index([userId])
+}
+
+model InterviewRound {
+  id                String              @id @default(cuid())
+  interviewId       String
+  interview         Interview           @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  roundNumber       Int
+  roundType         String              // SELF_INTRO, RESUME_DEEP_DIVE, TECHNICAL, CODING, BEHAVIORAL_HR
+  title             String
+  description       String?
+  status            String              @default("PENDING") // PENDING, IN_PROGRESS, COMPLETED, SKIPPED
+  score             Int                 @default(0)
+  feedback          String?             @db.Text
+  createdAt         DateTime            @default(now())
+
+  questions         InterviewQuestion[]
+  codingSubmissions CodingSubmission[]
+
+  @@index([interviewId])
+}
+
+model InterviewQuestion {
+  id                String            @id @default(cuid())
+  roundId           String
+  round             InterviewRound    @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  orderIndex        Int
+  questionText      String            @db.Text
+  category          String?
+  difficulty        String?           @default("Medium")
+  context           String?           @db.Text // Optional context or problem specification
+  idealAnswerPoints String?           @db.Text // JSON Array of key concepts expected
+  createdAt         DateTime          @default(now())
+
+  answers           InterviewAnswer[]
+
+  @@index([roundId])
+}
+
+model InterviewAnswer {
+  id                String            @id @default(cuid())
+  questionId        String
+  question          InterviewQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  userTranscript    String            @db.Text
+  recordingUrl      String?
+  durationSec       Int               @default(0)
+  score             Int               @default(0)
+  clarityScore      Int               @default(0)
+  relevanceScore    Int               @default(0)
+  fillerWordCount   Int               @default(0)
+  feedback          String?           @db.Text
+  strengths         String?           @db.Text // JSON Array
+  weaknesses        String?           @db.Text // JSON Array
+  improvedExample   String?           @db.Text // Better suggested answer
+  starAnalysis      String?           @db.Text // JSON { situation, task, action, result }
+  createdAt         DateTime          @default(now())
+
+  @@index([questionId])
+}
+
+model CodingSubmission {
+  id                String         @id @default(cuid())
+  roundId           String
+  round             InterviewRound @relation(fields: [roundId], references: [id], onDelete: Cascade)
+  language          String         @default("javascript")
+  code              String         @db.Text
+  testResults       String?        @db.Text // JSON Array of test case executions
+  correctnessScore  Int            @default(0)
+  complexityTime    String?
+  complexitySpace   String?
+  codeQualityScore  Int            @default(0)
+  feedback          String?        @db.Text
+  status            String         @default("EVALUATED") // SUBMITTED, EVALUATED
+  createdAt         DateTime       @default(now())
+
+  @@index([roundId])
+}
+
+model LearningRoadmap {
+  id              String         @id @default(cuid())
+  userId          String
+  user            User           @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
+  resumeId        String?
+  resume          Resume?        @relation(fields: [resumeId], references: [id], onDelete: SetNull)
+  interviewId     String?
+  interview       Interview?     @relation(fields: [interviewId], references: [id], onDelete: SetNull)
+  title           String         @default("Personalized Career Roadmap")
+  targetRole      String         @default("Software Engineer")
+  overallProgress Int            @default(0)
+  totalWeeks      Int            @default(4)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  items           RoadmapItem[]
+
+  @@index([userId])
+}
+
+model RoadmapItem {
+  id            String          @id @default(cuid())
+  roadmapId     String
+  roadmap       LearningRoadmap @relation(fields: [roadmapId], references: [id], onDelete: Cascade)
+  weekNumber    Int
+  skill         String
+  priority      String          @default("HIGH") // HIGH, MEDIUM, LOW
+  currentLevel  String          @default("Beginner")
+  targetLevel   String          @default("Proficient")
+  topics        String          @db.Text // JSON Array of topics
+  practiceTasks String          @db.Text // JSON Array of tasks
+  resources     String?         @db.Text // JSON Array of { title, url, type }
+  isCompleted   Boolean         @default(false)
+  completedAt   DateTime?
+
+  @@index([roadmapId])
+}
+
+model UserProgress {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [clerkId], onDelete: Cascade)
+  totalInterviews Int      @default(0)
+  avgScore        Int      @default(0)
+  resumesAnalyzed Int      @default(0)
+  roadmapsActive  Int      @default(0)
+  lastActiveAt    DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId])
+}

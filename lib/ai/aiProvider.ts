@@ -1,0 +1,485 @@
+import {
+  ResumeOverallAnalysis,
+  JobMatchAnalysis,
+  SelfIntroductionResult,
+  InterviewRoundData,
+  AnswerEvaluationResult,
+  CodingEvaluationResult,
+  InterviewFinalEvaluation,
+  LearningRoadmapData,
+} from "@/types";
+import { parseResumeSections } from "@/lib/parsers/resumeParser";
+import {
+  generateSmartResumeAnalysis,
+  generateSmartJobMatch,
+  generateSmartSelfIntroduction,
+  generateSmartInterviewQuestions,
+  evaluateSmartSpokenAnswer,
+  evaluateSmartCodingSubmission,
+  generateSmartInterviewReport,
+  generateSmartLearningRoadmap,
+} from "@/lib/ai/smartFallbackProvider";
+import { callGeminiAPI } from "@/lib/ai/geminiProvider";
+import { callOllamaAPI } from "@/lib/ai/ollamaProvider";
+import { callOpenRouterAPI } from "@/lib/ai/openrouterProvider";
+import { callGroqAPI } from "@/lib/ai/groqProvider";
+
+// AI Provider Router Helper
+async function executeAIPrompt(prompt: string): Promise<string | null> {
+  const provider = (process.env.AI_PROVIDER || "groq").toLowerCase();
+
+  // 1. Groq (Ultra-fast, Qwen 27B / Llama 3.3 70B)
+  if ((provider === "groq" || process.env.GROQ_API_KEY) && process.env.GROQ_API_KEY) {
+    const res = await callGroqAPI(prompt);
+    if (res) return res;
+  }
+
+  // 2. Gemini Free Tier
+  if (provider === "gemini" && process.env.GEMINI_API_KEY) {
+    const res = await callGeminiAPI(prompt);
+    if (res) return res;
+  }
+
+  // 3. Local Ollama
+  if (provider === "ollama") {
+    const res = await callOllamaAPI(prompt);
+    if (res) return res;
+  }
+
+  // 4. OpenRouter
+  if (provider === "openrouter" && process.env.OPENROUTER_API_KEY) {
+    const res = await callOpenRouterAPI(prompt);
+    if (res) return res;
+  }
+
+  return null;
+}
+
+export async function analyzeResume(rawText: string): Promise<ResumeOverallAnalysis> {
+  const parsedSections = parseResumeSections(rawText);
+
+  try {
+    const prompt = `You are a world-class Executive Resume Coach and ATS Specialist.
+Analyze the following resume text carefully and return a valid JSON object matching this schema:
+{
+  "overallScore": number (0-100),
+  "atsScore": number (0-100),
+  "contentScore": number (0-100),
+  "impactScore": number (0-100),
+  "skillsScore": number (0-100),
+  "experienceScore": number (0-100),
+  "projectsScore": number (0-100),
+  "formattingScore": number (0-100),
+  "grammarScore": number (0-100),
+  "topFixes": string[],
+  "sections": [
+    {
+      "sectionName": string,
+      "score": number (0-100),
+      "strengths": string[],
+      "weaknesses": string[],
+      "problems": string[],
+      "atsConcerns": string[],
+      "grammarConcerns": string[],
+      "originalText": string,
+      "suggestedReplacement": string,
+      "explanation": string
+    }
+  ]
+}
+
+Resume Text:
+${rawText.slice(0, 3000)}`;
+
+    const aiResponse = await executeAIPrompt(prompt);
+    if (aiResponse) {
+      const parsed = JSON.parse(aiResponse);
+      if (parsed.overallScore && parsed.sections) {
+        return parsed as ResumeOverallAnalysis;
+      }
+    }
+  } catch (error) {
+    console.warn("AI resume analysis failed, using smart fallback:", error);
+  }
+
+  return generateSmartResumeAnalysis(rawText, parsedSections);
+}
+
+export async function matchJobDescription(resumeText: string, jdText: string): Promise<JobMatchAnalysis> {
+  try {
+    const prompt = `Analyze this resume against the Job Description and return a valid JSON object:
+{
+  "overallMatch": number (0-100),
+  "skillsMatch": number (0-100),
+  "experienceMatch": number (0-100),
+  "keywordMatch": number (0-100),
+  "projectRelevance": number (0-100),
+  "educationMatch": number (0-100),
+  "responsibilitiesMatch": number (0-100),
+  "atsMatch": number (0-100),
+  "strongMatches": string[],
+  "missingSkills": [
+    { "skill": string, "reason": string, "whyToLearn": string, "relevance": string }
+  ],
+  "missingKeywords": [
+    { "keyword": string, "context": string, "importance": "High" | "Medium" | "Low" }
+  ],
+  "recommendations": string[]
+}
+
+Resume Text:
+${resumeText.slice(0, 2500)}
+
+Job Description:
+${jdText.slice(0, 2500)}`;
+
+    const aiResponse = await executeAIPrompt(prompt);
+    if (aiResponse) {
+      const parsed = JSON.parse(aiResponse);
+      if (parsed.overallMatch !== undefined && parsed.missingSkills) {
+        return parsed as JobMatchAnalysis;
+      }
+    }
+  } catch (error) {
+    console.warn("AI job matching failed, using smart fallback:", error);
+  }
+
+  return generateSmartJobMatch(resumeText, jdText);
+}
+
+export interface SelfIntroParams {
+  candidateName?: string;
+  education?: string;
+  targetRole?: string;
+  companyName?: string;
+  keyProjects?: string;
+  resumeText?: string;
+  jdText?: string;
+}
+
+export async function generateSelfIntroduction(
+  resumeTextOrParams: string | SelfIntroParams,
+  jdText?: string,
+  companyName?: string
+): Promise<SelfIntroductionResult> {
+  const params: SelfIntroParams =
+    typeof resumeTextOrParams === "object"
+      ? resumeTextOrParams
+      : { resumeText: resumeTextOrParams, jdText, companyName };
+
+  const candidateName = params.candidateName || "Sai Shankar";
+  const education = params.education || "Master's in Artificial Intelligence & Machine Learning";
+  const targetRole = params.targetRole || "Full-Stack Software Engineer";
+  const company = params.companyName || "the engineering team";
+  const resumeText = params.resumeText || "";
+  const keyProjects = params.keyProjects || "";
+
+  try {
+    const prompt = `You are an expert career coach helping a candidate craft an authentic, natural, humanized, conversational self-introduction for a live video interview.
+Candidate Info:
+- Name: ${candidateName && candidateName.toLowerCase() !== "candidate" ? candidateName : "Sai Shankar"}
+- Education: ${education}
+- Target Role: ${targetRole}
+- Target Company: ${company}
+- Key Projects / Highlights: ${keyProjects || "Full-stack web applications & high-throughput REST APIs"}
+
+CRITICAL WRITING GUIDELINES:
+1. Speak in warm, confident, and conversational human English as if speaking aloud to a friendly interviewer.
+2. DO NOT use the literal word "Candidate". Open naturally (e.g. "Hi there! My name is ${candidateName}...").
+3. DO NOT sound like a robot or dump keyword lists. Mention technologies naturally.
+4. Use natural transitions: "Recently on my project...", "What I enjoy most is...", "What really stands out to me about your team...".
+5. Return strictly valid JSON format:
+{
+  "pitch30": string,
+  "pitch60": string,
+  "pitch90": string,
+  "whyItWorks": string,
+  "keyHighlights": string[]
+}
+
+Resume Text:
+${resumeText.slice(0, 2000)}
+${params.jdText ? `Target Job Description:\n${params.jdText.slice(0, 1000)}` : ""}`;
+
+    const aiResponse = await executeAIPrompt(prompt);
+    if (aiResponse) {
+      const parsed = JSON.parse(aiResponse);
+      if (parsed.pitch30 && parsed.pitch60 && parsed.pitch90) {
+        return parsed as SelfIntroductionResult;
+      }
+    }
+  } catch (error) {
+    console.warn("AI self introduction generation failed, using smart fallback:", error);
+  }
+
+  return generateSmartSelfIntroduction(params);
+}
+
+export async function generateInterviewQuestions(
+  role: string = "Software Engineer",
+  resumeText: string = "",
+  jdText: string = ""
+): Promise<InterviewRoundData[]> {
+  try {
+    const prompt = `You are a Principal Tech Interviewer at a Tier-1 software company.
+Generate a structured 5-round mock interview tailored specifically to the candidate's Resume and target Job Description.
+
+Target Role: ${role}
+${resumeText ? `Candidate Resume Context:\n${resumeText.slice(0, 1800)}` : ""}
+${jdText ? `Target Job Description Requirements:\n${jdText.slice(0, 1200)}` : ""}
+
+Generate the 5 structured rounds with high precision:
+Round 1: SELF_INTRO - 2 questions (1 opening self-introduction, 1 role motivation / career aspirations question).
+Round 2: RESUME_DEEP_DIVE - 2 questions asking about the SPECIFIC projects, tools, and technical challenges listed on the candidate's resume.
+Round 3: TECHNICAL - 2 in-depth questions testing core technical concepts required by the Job Description and resume stack (e.g. system design, async operations, database optimization, indexing, APIs).
+Round 4: CODING - 1 algorithmic coding challenge matching the role with clear problem statement, example inputs/outputs, constraints, and evaluation criteria.
+Round 5: BEHAVIORAL_HR - 2 STAR behavioral questions evaluating adaptability, deadlines, communication, and teamwork.
+
+Return ONLY a strictly valid JSON array of 5 round objects:
+[
+  {
+    "roundNumber": 1,
+    "roundType": "SELF_INTRO",
+    "title": "Round 1: Self Introduction & Background",
+    "description": "Introduce yourself and articulate your technical background and career goals.",
+    "status": "PENDING",
+    "questions": [
+      { "orderIndex": 1, "questionText": string, "category": string, "difficulty": "Easy", "idealAnswerPoints": string[] },
+      { "orderIndex": 2, "questionText": string, "category": string, "difficulty": "Easy", "idealAnswerPoints": string[] }
+    ]
+  },
+  {
+    "roundNumber": 2,
+    "roundType": "RESUME_DEEP_DIVE",
+    "title": "Round 2: Resume & Project Deep-Dive",
+    "description": "In-depth questions on your actual projects and architectural decisions.",
+    "status": "PENDING",
+    "questions": [
+      { "orderIndex": 1, "questionText": string, "category": string, "difficulty": "Medium", "idealAnswerPoints": string[] },
+      { "orderIndex": 2, "questionText": string, "category": string, "difficulty": "Medium", "idealAnswerPoints": string[] }
+    ]
+  },
+  {
+    "roundNumber": 3,
+    "roundType": "TECHNICAL",
+    "title": "Round 3: Core Technical & System Architecture",
+    "description": "Evaluating your depth in system design, asynchronous patterns, and databases.",
+    "status": "PENDING",
+    "questions": [
+      { "orderIndex": 1, "questionText": string, "category": string, "difficulty": "Medium", "idealAnswerPoints": string[] },
+      { "orderIndex": 2, "questionText": string, "category": string, "difficulty": "Hard", "idealAnswerPoints": string[] }
+    ]
+  },
+  {
+    "roundNumber": 4,
+    "roundType": "CODING",
+    "title": "Round 4: Live Algorithmic Coding Challenge",
+    "description": "Live algorithm implementation in code editor.",
+    "status": "PENDING",
+    "questions": [
+      {
+        "orderIndex": 1,
+        "questionText": string,
+        "category": string,
+        "difficulty": "Medium",
+        "context": string,
+        "idealAnswerPoints": string[]
+      }
+    ]
+  },
+  {
+    "roundNumber": 5,
+    "roundType": "BEHAVIORAL_HR",
+    "title": "Round 5: HR & Behavioral (STAR Method)",
+    "description": "Evaluating collaboration, problem resolution, and communication.",
+    "status": "PENDING",
+    "questions": [
+      { "orderIndex": 1, "questionText": string, "category": "STAR Behavioral", "difficulty": "Medium", "idealAnswerPoints": string[] },
+      { "orderIndex": 2, "questionText": string, "category": "Career Aspirations", "difficulty": "Easy", "idealAnswerPoints": string[] }
+    ]
+  }
+]`;
+
+    const aiResponse = await executeAIPrompt(prompt);
+    if (aiResponse) {
+      const parsed = JSON.parse(aiResponse);
+      if (Array.isArray(parsed) && parsed.length === 5) {
+        return parsed as InterviewRoundData[];
+      }
+    }
+  } catch (error) {
+    console.warn("AI question generation failed, using smart fallback:", error);
+  }
+
+  return generateSmartInterviewQuestions(role, resumeText, jdText);
+}
+
+export async function evaluateSpokenAnswer(
+  questionText: string,
+  transcript: string,
+  roundType: string = "SELF_INTRO"
+): Promise<AnswerEvaluationResult> {
+  const cleanTranscript = (transcript || "").trim();
+  const isSkipped = !cleanTranscript || cleanTranscript.toLowerCase().includes("skipped") || cleanTranscript.toLowerCase().includes("no answer");
+
+  if (isSkipped) {
+    return evaluateSmartSpokenAnswer(questionText, transcript, roundType);
+  }
+
+  try {
+    const prompt = `Evaluate this spoken interview answer transcript and return a valid JSON:
+{
+  "score": number (0-100),
+  "clarityScore": number (0-100),
+  "relevanceScore": number (0-100),
+  "fillerWordCount": number,
+  "detectedFillerWords": string[],
+  "feedback": string,
+  "strengths": string[],
+  "weaknesses": string[],
+  "improvedExample": string,
+  "starAnalysis": { "situation": string, "task": string, "action": string, "result": string }
+}
+
+Question: "${questionText}"
+User Answer: "${cleanTranscript}"`;
+
+    const aiResponse = await executeAIPrompt(prompt);
+    if (aiResponse) {
+      const parsed = JSON.parse(aiResponse);
+      if (parsed.score !== undefined && parsed.improvedExample) {
+        return parsed as AnswerEvaluationResult;
+      }
+    }
+  } catch (error) {
+    console.warn("AI answer evaluation failed, using smart fallback:", error);
+  }
+
+  return evaluateSmartSpokenAnswer(questionText, cleanTranscript, roundType);
+}
+
+export async function evaluateCodingSubmission(
+  code: string,
+  language: string = "javascript",
+  context?: string
+): Promise<CodingEvaluationResult> {
+  try {
+    const prompt = `Review this coding solution in ${language} and return a JSON object:
+{
+  "correctnessScore": number (0-100),
+  "complexityTime": string (e.g. "O(n)"),
+  "complexitySpace": string (e.g. "O(1)"),
+  "codeQualityScore": number (0-100),
+  "feedback": string,
+  "testResults": [
+    { "testCaseNumber": 1, "input": string, "expectedOutput": string, "actualOutput": string, "passed": boolean, "notes": string }
+  ],
+  "optimizationSuggestions": string[]
+}
+
+Problem:
+${context || "Two Sum"}
+
+Code:
+${code}`;
+
+    const aiResponse = await executeAIPrompt(prompt);
+    if (aiResponse) {
+      const parsed = JSON.parse(aiResponse);
+      if (parsed.correctnessScore !== undefined && parsed.complexityTime) {
+        return parsed as CodingEvaluationResult;
+      }
+    }
+  } catch (error) {
+    console.warn("AI coding evaluation failed, using smart fallback:", error);
+  }
+
+  return evaluateSmartCodingSubmission(code, language, context);
+}
+
+export async function generateFinalInterviewReport(
+  scores: { round: number; score: number; type: string }[]
+): Promise<InterviewFinalEvaluation> {
+  return generateSmartInterviewReport(scores);
+}
+
+export interface RoadmapSynthesisContext {
+  role?: string;
+  missingSkills?: string[];
+  interviewWeaknesses?: string[];
+  resumeGaps?: string[];
+  resumeText?: string;
+  targetCompany?: string;
+}
+
+export async function generateLearningRoadmap(
+  roleOrContext: string | RoadmapSynthesisContext = "Full-Stack Software Engineer",
+  fallbackWeaknesses: string[] = []
+): Promise<LearningRoadmapData> {
+  const context: RoadmapSynthesisContext =
+    typeof roleOrContext === "object" && roleOrContext !== null
+      ? roleOrContext
+      : { role: roleOrContext, missingSkills: fallbackWeaknesses };
+
+  const targetRole = context.role || "Full-Stack Software Engineer";
+  const missingSkills = context.missingSkills?.length
+    ? context.missingSkills.join(", ")
+    : "PostgreSQL Indexing, System Design, CI/CD, React 19 Architecture";
+  const interviewGaps = context.interviewWeaknesses?.length
+    ? context.interviewWeaknesses.join("; ")
+    : "STAR method structure, quantifying technical impact, async event loop";
+  const resumeGaps = context.resumeGaps?.length
+    ? context.resumeGaps.join("; ")
+    : "Cloud deployments, performance optimization metrics";
+
+  try {
+    const prompt = `You are a Principal Software Engineering Mentor and Tech Career Strategist.
+Generate a comprehensive, custom 4-Week Technical Learning Roadmap tailored specifically to close this candidate's verified skill gaps.
+
+Target Role: ${targetRole}
+Key Missing Skills (from Target Job Descriptions): ${missingSkills}
+Interview Diagnostic Weaknesses (from Mock Interviews): ${interviewGaps}
+Resume Improvement Areas: ${resumeGaps}
+
+Generate a 4-week structured milestone curriculum:
+- Week 1: Foundational core language / architecture gap
+- Week 2: Deep dive into the missing framework / frontend / backend tech
+- Week 3: Database scaling, query optimization, or cloud infrastructure
+- Week 4: Interview mastery (STAR method, system design, timed algorithm challenges)
+
+Return strictly valid JSON only matching this schema:
+{
+  "title": "4-Week Master Roadmap for ${targetRole}",
+  "targetRole": "${targetRole}",
+  "overallProgress": 0,
+  "totalWeeks": 4,
+  "items": [
+    {
+      "weekNumber": 1,
+      "skill": string,
+      "priority": "HIGH" | "MEDIUM" | "LOW",
+      "currentLevel": "Beginner" | "Intermediate",
+      "targetLevel": "Intermediate" | "Advanced" | "Proficient",
+      "topics": string[] (3-4 specific technical topics),
+      "practiceTasks": string[] (2-3 hands-on coding exercises),
+      "resources": [
+        { "title": string, "url": string, "type": "Documentation" | "Article" | "Practice" }
+      ],
+      "isCompleted": false
+    }
+  ]
+}`;
+
+    const aiResponse = await executeAIPrompt(prompt);
+    if (aiResponse) {
+      const parsed = JSON.parse(aiResponse);
+      if (parsed.items && Array.isArray(parsed.items) && parsed.items.length >= 4) {
+        return parsed as LearningRoadmapData;
+      }
+    }
+  } catch (error) {
+    console.warn("AI learning roadmap generation failed, using smart fallback:", error);
+  }
+
+  return generateSmartLearningRoadmap(targetRole, context.missingSkills || fallbackWeaknesses);
+}
