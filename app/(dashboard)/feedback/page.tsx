@@ -59,26 +59,26 @@ export default function FeedbackPage() {
 
   if (isLoading) {
     return (
-      <div className="py-20 flex flex-col items-center justify-center space-y-3">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-        <span className="text-xs font-semibold text-slate-500">Loading your real interview performance feedback...</span>
+      <div className="py-24 flex flex-col items-center justify-center space-y-3">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
+        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Loading your real interview performance feedback...</span>
       </div>
     );
   }
 
   if (!hasSession || answers.length === 0) {
     return (
-      <div className="max-w-2xl mx-auto py-12 text-center space-y-4">
-        <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto">
+      <div className="max-w-2xl mx-auto py-16 text-center space-y-4">
+        <div className="w-16 h-16 rounded-3xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto shadow-xs">
           <MessageSquareCheck className="w-8 h-8" />
         </div>
-        <h2 className="text-xl font-bold text-slate-900">No Mock Interview Completed Yet</h2>
-        <p className="text-xs text-slate-500 max-w-md mx-auto">
-          Take your first AI video mock interview to receive real spoken answer transcript evaluations, STAR model rewrites, and weakness diagnostics.
+        <h2 className="text-xl font-black text-slate-900 dark:text-white">No Mock Interview Completed Yet</h2>
+        <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+          Take your first AI video mock interview to receive real spoken answer transcript evaluations, model answer rewrites, and weakness diagnostics.
         </p>
         <Link
           href="/mock-interview"
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 text-xs font-bold text-white hover:bg-indigo-700 transition-all shadow-md shadow-indigo-200"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-xs font-bold text-white transition-all shadow-md shadow-indigo-500/25"
         >
           <Video className="w-4 h-4" />
           <span>Start Your First Mock Interview</span>
@@ -89,25 +89,25 @@ export default function FeedbackPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-700 text-xs font-semibold mb-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs font-semibold mb-2">
             <MessageSquareCheck className="w-3.5 h-3.5" />
             <span>AI Diagnostic Feedback Studio ({targetRole})</span>
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
             Performance Review & Answer Improvements
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Actionable breakdowns of your real spoken answers, detected gaps, and structured STAR model rewrites.
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            Actionable breakdowns of your real spoken answers, detected gaps, and structured model rewrites.
           </p>
         </div>
 
         <Link
           href="/roadmap"
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-xs font-bold text-white transition-colors shadow-xs shadow-indigo-200"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-xs font-bold text-white transition-all shadow-md shadow-indigo-500/25"
         >
           <Compass className="w-3.5 h-3.5" />
           <span>Follow Personalized Roadmap</span>
@@ -119,14 +119,14 @@ export default function FeedbackPage() {
         <StrengthsWeaknessesCard strengths={strengths} improvements={improvements} />
       ) : null}
 
-      {/* Granular Answer-by-Answer STAR Improvements */}
+      {/* Granular Answer-by-Answer Improvements */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-slate-900 font-bold text-sm">
-            <Sparkles className="w-4 h-4 text-indigo-600" />
-            <span>Real Answer-by-Answer Improvements (STAR Framework)</span>
+          <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-sm">
+            <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            <span>Real Answer-by-Answer Improvements</span>
           </div>
-          <span className="text-xs text-slate-500">{answers.length} questions in latest session</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">{answers.length} questions in latest session</span>
         </div>
 
         <div className="space-y-4">

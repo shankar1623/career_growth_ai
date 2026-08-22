@@ -29,12 +29,14 @@ export function RoadmapItemCard({ item, onToggleComplete }: RoadmapItemCardProps
 
   return (
     <div
-      className={`bg-white rounded-2xl border transition-all shadow-xs overflow-hidden ${
-        isCompleted ? "border-emerald-200 bg-emerald-50/10" : "border-slate-200 hover:border-slate-300"
+      className={`rounded-3xl border transition-all shadow-xs overflow-hidden ${
+        isCompleted
+          ? "border-emerald-200 dark:border-emerald-900 bg-emerald-50/20 dark:bg-emerald-950/20"
+          : "bg-white dark:bg-slate-900 border-slate-200/90 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700"
       }`}
     >
       {/* Header */}
-      <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-50/50">
+      <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/40">
         <div className="flex items-center gap-3">
           <div
             className={`w-9 h-9 rounded-xl font-bold text-xs flex items-center justify-center ${
@@ -47,23 +49,23 @@ export function RoadmapItemCard({ item, onToggleComplete }: RoadmapItemCardProps
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-slate-900">{item.skill}</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">{item.skill}</h3>
               <span
                 className={`text-[10px] font-bold px-2 py-0.5 rounded-md uppercase tracking-wider ${
                   item.priority === "HIGH"
-                    ? "bg-rose-100 text-rose-800 border border-rose-200"
+                    ? "bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
                     : item.priority === "MEDIUM"
-                    ? "bg-amber-100 text-amber-800 border border-amber-200"
-                    : "bg-blue-100 text-blue-800 border border-blue-200"
+                    ? "bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
+                    : "bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
                 }`}
               >
                 {item.priority} Priority
               </span>
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-slate-500 mt-0.5">
-              <span>Current: <strong className="text-slate-700 font-semibold">{item.currentLevel}</strong></span>
+            <div className="flex items-center gap-1.5 text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+              <span>Current: <strong className="text-slate-700 dark:text-slate-300 font-semibold">{item.currentLevel}</strong></span>
               <span>&rarr;</span>
-              <span>Target: <strong className="text-indigo-600 font-semibold">{item.targetLevel}</strong></span>
+              <span>Target: <strong className="text-indigo-600 dark:text-indigo-400 font-semibold">{item.targetLevel}</strong></span>
             </div>
           </div>
         </div>
@@ -74,16 +76,16 @@ export function RoadmapItemCard({ item, onToggleComplete }: RoadmapItemCardProps
           disabled={isUpdating}
           className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold border transition-colors shadow-xs ${
             isCompleted
-              ? "bg-emerald-50 border-emerald-300 text-emerald-700 hover:bg-emerald-100"
-              : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+              ? "bg-emerald-50 dark:bg-emerald-950/60 border-emerald-300 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-100"
+              : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700"
           }`}
         >
           {isUpdating ? (
-            <Loader2 className="w-4 h-4 animate-spin text-indigo-600" />
+            <Loader2 className="w-4 h-4 animate-spin text-indigo-600 dark:text-indigo-400" />
           ) : isCompleted ? (
-            <CheckSquare className="w-4 h-4 text-emerald-600" />
+            <CheckSquare className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           ) : (
-            <Square className="w-4 h-4 text-slate-400" />
+            <Square className="w-4 h-4 text-slate-400 dark:text-slate-500" />
           )}
           <span>{isCompleted ? "Completed" : "Mark as Done"}</span>
         </button>
@@ -92,16 +94,16 @@ export function RoadmapItemCard({ item, onToggleComplete }: RoadmapItemCardProps
       <div className="p-6 space-y-5 text-xs">
         {/* Core Topics */}
         <div>
-          <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px] block mb-2">
+          <span className="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-[11px] block mb-2">
             Weekly Focus Topics
           </span>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {item.topics.map((top, idx) => (
               <div
                 key={idx}
-                className="p-2.5 rounded-lg bg-slate-50 border border-slate-100 text-slate-700 font-medium flex items-center gap-2"
+                className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-750 text-slate-700 dark:text-slate-300 font-medium flex items-center gap-2"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 dark:bg-indigo-400 shrink-0" />
                 <span>{top}</span>
               </div>
             ))}
@@ -110,13 +112,13 @@ export function RoadmapItemCard({ item, onToggleComplete }: RoadmapItemCardProps
 
         {/* Practice Tasks */}
         <div>
-          <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px] block mb-2">
+          <span className="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-[11px] block mb-2">
             Hands-On Practice Tasks
           </span>
           <ul className="space-y-1.5">
             {item.practiceTasks.map((task, idx) => (
-              <li key={idx} className="p-2.5 rounded-lg bg-indigo-50/40 border border-indigo-100 text-indigo-950 font-medium flex items-start gap-2">
-                <Target className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+              <li key={idx} className="p-2.5 rounded-xl bg-indigo-50/40 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/60 text-indigo-950 dark:text-indigo-200 font-medium flex items-start gap-2">
+                <Target className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
                 <span>{task}</span>
               </li>
             ))}
@@ -126,7 +128,7 @@ export function RoadmapItemCard({ item, onToggleComplete }: RoadmapItemCardProps
         {/* Recommended Free Resources */}
         {item.resources && item.resources.length > 0 && (
           <div>
-            <span className="font-bold text-slate-800 uppercase tracking-wider text-[11px] block mb-2">
+            <span className="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider text-[11px] block mb-2">
               Recommended Free Learning Resources
             </span>
             <div className="flex flex-wrap gap-2">
@@ -136,11 +138,11 @@ export function RoadmapItemCard({ item, onToggleComplete }: RoadmapItemCardProps
                   href={res.url || "#"}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-indigo-600 hover:border-indigo-200 transition-colors shadow-xs"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:border-indigo-200 dark:hover:border-indigo-700 transition-colors shadow-xs"
                 >
-                  <BookOpen className="w-3.5 h-3.5 text-slate-400" />
+                  <BookOpen className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
                   <span className="font-medium">{res.title}</span>
-                  <ExternalLink className="w-3 h-3 text-slate-400" />
+                  <ExternalLink className="w-3 h-3 text-slate-400 dark:text-slate-500" />
                 </a>
               ))}
             </div>
