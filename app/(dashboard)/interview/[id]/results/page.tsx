@@ -58,8 +58,8 @@ export default function InterviewResultsPage({
   if (isLoading) {
     return (
       <div className="py-24 flex flex-col items-center justify-center space-y-3">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
-        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Calculating your 5-round performance metrics...</span>
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-400" />
+        <span className="text-xs font-bold text-slate-400">Calculating your 5-round performance metrics...</span>
       </div>
     );
   }
@@ -93,61 +93,61 @@ export default function InterviewResultsPage({
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-8 animate-in fade-in duration-300">
       {/* Celebration Header */}
-      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xs p-8 sm:p-10 text-center space-y-4 transition-colors">
-        <div className="w-16 h-16 rounded-3xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto shadow-xs">
+      <div className="bg-[#0b0f19] rounded-3xl border border-slate-800 shadow-2xl p-8 sm:p-10 text-center space-y-4 text-white">
+        <div className="w-16 h-16 rounded-3xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center mx-auto shadow-md">
           <Award className="w-8 h-8" />
         </div>
 
         <div className="space-y-1">
-          <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">
+          <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider">
             Mock Interview Completed
           </span>
-          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+          <h1 className="text-3xl font-black text-white tracking-tight">
             5-Round Interview Assessment Report
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
+          <p className="text-xs text-slate-300 font-medium">
             Role: {interview.targetRole}
           </p>
         </div>
 
         {/* Overall Score Badge */}
-        <div className="inline-flex flex-col items-center justify-center p-5 rounded-2xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 min-w-[200px] mt-2">
-          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+        <div className="inline-flex flex-col items-center justify-center p-5 rounded-2xl bg-[#0f172a] border border-indigo-500/30 min-w-[200px] mt-2 shadow-inner">
+          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
             Overall Interview Score
           </span>
           <div className="mt-1 flex items-baseline gap-1">
             <span className={`text-5xl font-black ${colors.text}`}>
               {interview.overallScore}
             </span>
-            <span className="text-sm font-bold text-slate-400 dark:text-slate-500">/ 100</span>
+            <span className="text-sm font-bold text-slate-400">/ 100</span>
           </div>
-          <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full mt-2">
+          <span className="text-[11px] font-bold text-emerald-300 bg-emerald-950/80 border border-emerald-700/60 px-2.5 py-0.5 rounded-full mt-2">
             Top 15% Candidate Performance
           </span>
         </div>
 
         {interview.summaryFeedback && (
-          <p className="text-xs text-slate-600 dark:text-slate-300 max-w-xl mx-auto leading-relaxed pt-2">
+          <p className="text-xs text-slate-300 max-w-xl mx-auto leading-relaxed pt-2">
             {interview.summaryFeedback}
           </p>
         )}
       </div>
 
       {/* 7-Dimensional Breakdown Cards */}
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xs space-y-4 transition-colors">
-        <h3 className="text-sm font-bold text-slate-900 dark:text-white">Score Breakdown by Competency</h3>
+      <div className="bg-[#0b0f19] p-6 rounded-3xl border border-slate-800 shadow-2xl space-y-4 text-white">
+        <h3 className="text-sm font-bold text-white">Score Breakdown by Competency</h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
           {breakdown.map((item) => {
             const subCol = getScoreColor(item.score);
             return (
-              <div key={item.label} className="p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
-                <span className="text-xs font-medium text-slate-600 dark:text-slate-300 block truncate">{item.label}</span>
+              <div key={item.label} className="p-4 rounded-2xl bg-[#0f172a] border border-indigo-500/20">
+                <span className="text-xs font-medium text-slate-300 block truncate">{item.label}</span>
                 <div className="mt-2 flex items-baseline gap-1">
                   <span className={`text-2xl font-black ${subCol.text}`}>{item.score}</span>
-                  <span className="text-[10px] text-slate-400 dark:text-slate-500">/ 100</span>
+                  <span className="text-[10px] text-slate-400">/ 100</span>
                 </div>
-                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5 mt-2 overflow-hidden">
+                <div className="w-full bg-slate-800 rounded-full h-1.5 mt-2 overflow-hidden">
                   <div
                     className={`h-full ${
                       item.score >= 80 ? "bg-emerald-500" : item.score >= 60 ? "bg-indigo-500" : "bg-amber-500"
@@ -161,22 +161,22 @@ export default function InterviewResultsPage({
         </div>
       </div>
 
-      {/* Bottom Action Navigation */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-slate-100/70 dark:bg-slate-850 rounded-3xl border border-slate-200 dark:border-slate-800 transition-colors">
+      {/* Bottom Action Navigation in Dark Theme */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 bg-[#0f172a] rounded-3xl border border-indigo-500/30 shadow-xl transition-colors">
         <Link
           href="/mock-interview"
-          className="inline-flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+          className="inline-flex items-center gap-2 text-xs font-bold text-slate-300 hover:text-white transition-colors"
         >
-          <RotateCcw className="w-4 h-4" />
+          <RotateCcw className="w-4 h-4 text-indigo-400" />
           <span>Practice Another Mock Interview</span>
         </Link>
 
         <div className="flex items-center gap-3">
           <Link
             href="/feedback"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-800 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-xs"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#090d16] border border-slate-700 text-xs font-bold text-slate-200 hover:text-white hover:border-slate-600 transition-colors shadow-xs"
           >
-            <MessageSquareCheck className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+            <MessageSquareCheck className="w-4 h-4 text-indigo-400" />
             <span>Detailed Feedback</span>
           </Link>
 

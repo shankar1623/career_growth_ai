@@ -98,7 +98,7 @@ export function SectionAnalysisCard({ section }: SectionAnalysisCardProps) {
         )}
 
         {/* The Exact Comparison: Original -> Problems -> Suggested Replacement */}
-        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-850 overflow-hidden divide-y divide-slate-200 dark:divide-slate-800">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-900 overflow-hidden divide-y divide-slate-200 dark:divide-slate-800">
           {/* 1. Original Content */}
           <div className="p-4 bg-rose-50/20 dark:bg-rose-950/20">
             <div className="flex items-center justify-between mb-2">

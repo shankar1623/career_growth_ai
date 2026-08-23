@@ -428,30 +428,30 @@ export default function LiveInterviewRoomPage() {
       {!isCodingRound && (
         <div className={`p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
           isAiSpeaking
-            ? "bg-indigo-50/50 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800 text-indigo-900 dark:text-indigo-200"
+            ? "bg-indigo-950/70 border-indigo-500/50 text-indigo-200"
             : isUserSpeaking
-            ? "bg-emerald-50/70 dark:bg-emerald-950/40 border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200"
-            : "bg-slate-50 dark:bg-slate-850 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300"
+            ? "bg-emerald-950/70 border-emerald-500/50 text-emerald-200"
+            : "bg-[#0f172a] border-indigo-500/30 text-white"
         }`}>
           <div className="flex items-center gap-2.5">
             <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${
               isAiSpeaking
-                ? "bg-indigo-100 dark:bg-indigo-900/60 text-indigo-600 dark:text-indigo-300"
+                ? "bg-indigo-900/80 text-indigo-300"
                 : isUserSpeaking
-                ? "bg-emerald-100 dark:bg-emerald-900/60 text-emerald-600 dark:text-emerald-300 animate-pulse"
-                : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
+                ? "bg-emerald-900/80 text-emerald-300 animate-pulse"
+                : "bg-indigo-950 text-indigo-400 border border-indigo-800"
             }`}>
               <Mic className="w-4 h-4" />
             </div>
             <div className="text-xs">
-              <span className="font-bold block">
+              <span className="font-bold text-white block">
                 {isAiSpeaking
                   ? "AI Interviewer is asking the question..."
                   : isUserSpeaking
                   ? "Transcribing your voice in real time..."
                   : "Microphone Active (2-min timer running): Speak your answer clearly"}
               </span>
-              <span className="text-[11px] text-slate-500 dark:text-slate-400">
+              <span className="text-[11px] text-slate-300">
                 {liveTranscript
                   ? `${liveTranscript.split(/\s+/).filter(Boolean).length} words recorded`
                   : "Your transcribed words will appear on your webcam screen."}

@@ -194,7 +194,7 @@ export default function MockInterviewSetupPage() {
         </div>
 
         {/* Optional Target Job Description Textarea */}
-        <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-850 space-y-2">
+        <div className="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900 space-y-2">
           <div className="flex items-center justify-between">
             <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
               <Target className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
