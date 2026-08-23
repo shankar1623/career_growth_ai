@@ -1255,10 +1255,28 @@ export function generateSmartInterviewReport(
     ].filter(Boolean),
     improvements: [
       {
-        problem: "Answers occasionally lacked quantifiable business metrics",
-        whyItMatters: "Interviewers look for measurable impact (e.g. latency reduction, scale, reliability %).",
-        betterExample: "'I optimized queries using indexing, reducing average response latency from 350ms to 80ms.'",
-        howToPractice: "Quantify every project bullet point on your resume with concrete before-and-after numbers.",
+        problem: "Architectural answers lacked explicit discussion of system bottlenecks, caching layers, and database scaling trade-offs.",
+        whyItMatters: "Senior tech hiring panels look for candidates who understand distributed failure modes, Redis cache invalidation strategies, and read/write scaling.",
+        betterExample: "'We implemented Redis caching with a write-through invalidation strategy and 5-minute TTL on product catalog endpoints, which offloaded 75% of read queries from PostgreSQL and dropped p99 API response times from 420ms to 45ms under 15,000 requests/sec.'",
+        howToPractice: "Map out complete end-to-end architecture diagrams for your projects: Client -> CDN -> Load Balancer -> Node.js API Cluster -> Redis Cache -> PostgreSQL DB with Read Replicas.",
+      },
+      {
+        problem: "Behavioral and project answers omitted specific before-and-after business metrics and quantified results.",
+        whyItMatters: "Top tech companies evaluate impact through measurable indicators (e.g. latency drop %, database query execution time reduction, automated test coverage gains, infrastructure cost savings).",
+        betterExample: "'When query latency spiked to 2.4 seconds during peak checkout hours, I profiled the execution plans with EXPLAIN ANALYZE, added composite B-Tree indexes on (user_id, status), and reduced database query execution time by 88% down to 28ms.'",
+        howToPractice: "Format all experience answers using the STAR framework: Situation (15s) -> Task (15s) -> Action (45s with deep technical decisions) -> Result (15s with concrete numbers).",
+      },
+      {
+        problem: "Live coding solutions did not explicitly state boundary edge-case handling (null inputs, empty arrays, integer overflows) and Big-O space/time proofs.",
+        whyItMatters: "Interviewers evaluate code quality and algorithmic robustness by how proactively you validate constraints before typing code and articulate asymptotic complexities.",
+        betterExample: "'Before iterating, I validate if the input array is null or has fewer than 2 elements. Using a hash map frequency table achieves strict O(N) linear time complexity with O(N) auxiliary space, avoiding a nested brute-force O(N^2) search.'",
+        howToPractice: "Always write down and verify 3 test cases aloud (nominal case, empty/null boundary, large scale constraints) before implementing the algorithm.",
+      },
+      {
+        problem: "Troubleshooting explanations focused only on the bug fix without covering observability, automated alerting thresholds, and regression prevention.",
+        whyItMatters: "Modern engineering teams expect senior engineers to implement continuous monitoring, distributed tracing, and automated CI/CD safeguards to prevent regressions.",
+        betterExample: "'To isolate the production memory leak, we analyzed Prometheus heap metrics to detect unclosed WebSocket channels, hotfixed the connection cleanup in middleware, and added automated synthetic load tests in GitHub Actions to block future leaks.'",
+        howToPractice: "Structure all incident post-mortems with: Detection & Alerting -> Blast Radius Containment -> Root Cause Analysis -> Permanent Hotfix -> Automated Regression Prevention.",
       },
     ],
   };
