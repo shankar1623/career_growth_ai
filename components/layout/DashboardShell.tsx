@@ -1,12 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { AppSidebar } from "@/components/layout/AppSidebar";
 import { AppHeader } from "@/components/layout/AppHeader";
 
 export function DashboardShell({ children }: { children: React.ReactNode }) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
   return (
     <div className="h-screen w-full flex bg-[#fbf9f5] dark:bg-[#090d16] overflow-hidden relative selection:bg-indigo-600 selection:text-white text-stone-900 dark:text-stone-100 transition-colors duration-200">
       {/* Subtle Ambient Background Mesh */}
@@ -19,16 +16,9 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
         <AppSidebar />
       </div>
 
-      {/* Mobile Drawer Navigation (Visible on screens < 1024px when toggled) */}
-      <AppSidebar
-        isMobile
-        isOpen={isMobileMenuOpen}
-        onClose={() => setIsMobileMenuOpen(false)}
-      />
-
       {/* Main Content Viewport with independent scroll */}
       <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden relative z-10 w-full">
-        <AppHeader onToggleMobileMenu={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
+        <AppHeader />
         <main className="flex-1 p-3.5 sm:p-6 md:p-8 max-w-7xl w-full mx-auto overflow-y-auto overflow-x-hidden">
           {children}
         </main>
