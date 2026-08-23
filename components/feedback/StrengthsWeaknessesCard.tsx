@@ -48,9 +48,9 @@ export function StrengthsWeaknessesCard({
       <div className="bg-[#0b0f19] dark:bg-[#0b0f19] p-4 sm:p-7 rounded-3xl border border-slate-800 shadow-2xl transition-colors">
         {/* Main Section Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 border-b border-slate-800/80 pb-4">
-          <div className="flex items-center gap-2.5 text-amber-400 font-extrabold text-sm uppercase tracking-wider">
-            <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center">
-              <AlertTriangle className="w-4 h-4" />
+          <div className="flex items-center gap-2.5 text-indigo-400 font-extrabold text-sm uppercase tracking-wider">
+            <div className="w-8 h-8 rounded-xl bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center">
+              <Sparkles className="w-4 h-4" />
             </div>
             <span>5-Round Performance Review & Question Analysis</span>
           </div>
@@ -114,130 +114,140 @@ export function StrengthsWeaknessesCard({
                   {/* Expandable Round Content */}
                   {isExpanded && (
                     <div className="divide-y divide-slate-800 animate-in fade-in duration-200">
-                      {/* 1. Problem Identification */}
+                      {/* 1. Coach Observation */}
                       <div className="p-5 bg-rose-950/25 flex items-start gap-3.5">
                         <div className="w-7 h-7 rounded-xl bg-rose-900/60 border border-rose-700/60 text-rose-300 font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
-                          !
+                          💬
                         </div>
                         <div>
                           <span className="font-extrabold text-rose-300 uppercase tracking-wider text-[11px] block mb-1">
-                            Identified Diagnostic Focus Area
+                            Coach&apos;s Direct Observation
                           </span>
                           <p className="text-white leading-relaxed font-semibold text-sm">{round.problem}</p>
                         </div>
                       </div>
 
-                      {/* 2. Why It Matters to Interviewers */}
+                      {/* 2. Why Interviewers Care */}
                       <div className="p-5 bg-amber-950/20 flex items-start gap-3.5">
                         <div className="w-7 h-7 rounded-xl bg-amber-900/60 border border-amber-700/60 text-amber-300 font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
-                          <Lightbulb className="w-4 h-4" />
+                          💡
                         </div>
                         <div>
                           <span className="font-extrabold text-amber-300 uppercase tracking-wider text-[11px] block mb-1">
-                            Why Top Tech Interviewers Care
+                            Why Interviewers Look for This
                           </span>
                           <p className="text-slate-300 leading-relaxed font-medium">{round.whyItMatters}</p>
                         </div>
                       </div>
 
-                      {/* 3. Actionable Practice & Master Strategy */}
+                      {/* 3. Actionable Practice */}
                       <div className="p-5 bg-indigo-950/25 flex items-start gap-3.5">
                         <div className="w-7 h-7 rounded-xl bg-indigo-900/60 border border-indigo-700/60 text-indigo-300 font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
-                          <BookOpen className="w-4 h-4" />
+                          🎯
                         </div>
                         <div>
                           <span className="font-extrabold text-indigo-300 uppercase tracking-wider text-[11px] block mb-1">
-                            How to Practice & Master Round {round.roundNumber}
+                            How to Practice for Next Time
                           </span>
                           <p className="text-slate-300 leading-relaxed font-medium">{round.howToPractice}</p>
                         </div>
                       </div>
 
-                      {/* 4. Questions, Spoken Answers & Recommended Model Answers for this Round */}
+                      {/* 4. Questions, Spoken Answers & Humanized Model Answers */}
                       {questions.length > 0 && (
                         <div className="p-5 bg-[#090d16] space-y-4">
                           <div className="flex items-center gap-2 text-indigo-400 font-bold text-xs uppercase tracking-wider">
                             <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                            <span>Round {round.roundNumber} Questions, Spoken Answers & Recommended Model Answers</span>
+                            <span>Round {round.roundNumber} Questions & Humanized Model Answers</span>
                           </div>
 
                           <div className="space-y-4">
-                            {questions.map((q, qIdx) => (
-                              <div
-                                key={qIdx}
-                                className="p-4 sm:p-5 rounded-2xl bg-[#0f172a] border border-slate-800 space-y-4 shadow-md text-xs"
-                              >
-                                {/* Question Title & Score */}
-                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
-                                  <div className="flex items-start gap-2.5">
-                                    <span className="w-6 h-6 rounded-lg bg-indigo-900/60 text-indigo-300 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
-                                      Q{qIdx + 1}
-                                    </span>
-                                    <h5 className="text-xs sm:text-sm font-bold text-white leading-snug">
-                                      {q.questionText}
-                                    </h5>
-                                  </div>
-                                  <span className="px-3 py-1 rounded-xl bg-indigo-950 border border-indigo-700 text-indigo-300 font-bold text-xs shrink-0">
-                                    Score: {q.score}/100
-                                  </span>
-                                </div>
+                            {questions.map((q, qIdx) => {
+                              const isSkipped = q.score === 0 || q.transcript.includes("Skipped") || q.transcript.includes("No answer");
 
-                                {/* Candidate's Spoken Answer */}
-                                <div className="p-3.5 rounded-xl bg-[#090d16] border border-slate-800 space-y-1">
-                                  <div className="flex items-center justify-between text-slate-400 font-semibold text-[11px]">
-                                    <span>Your Spoken Answer:</span>
-                                    {q.fillerWordCount > 0 && (
-                                      <span className="text-rose-400 font-bold">
-                                        {q.fillerWordCount} filler words detected
+                              return (
+                                <div
+                                  key={qIdx}
+                                  className="p-4 sm:p-5 rounded-2xl bg-[#0f172a] border border-slate-800 space-y-4 shadow-md text-xs"
+                                >
+                                  {/* Question Title & Score */}
+                                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                                    <div className="flex items-start gap-2.5">
+                                      <span className="w-6 h-6 rounded-lg bg-indigo-900/60 text-indigo-300 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                                        Q{qIdx + 1}
                                       </span>
-                                    )}
-                                  </div>
-                                  <p className="text-slate-200 font-medium leading-relaxed italic">
-                                    &ldquo;{q.transcript}&rdquo;
-                                  </p>
-                                </div>
-
-                                {/* Strengths & Opportunities */}
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                  <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-900/60 space-y-1">
-                                    <span className="font-bold text-emerald-300 flex items-center gap-1.5">
-                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                                      Observed Strengths
+                                      <h5 className="text-xs sm:text-sm font-bold text-white leading-snug">
+                                        {q.questionText}
+                                      </h5>
+                                    </div>
+                                    <span className={`px-3 py-1 rounded-xl font-bold text-xs shrink-0 ${
+                                      q.score >= 50
+                                        ? "bg-emerald-950/80 border border-emerald-700 text-emerald-300"
+                                        : "bg-rose-950/80 border border-rose-700 text-rose-300"
+                                    }`}>
+                                      Score: {q.score}/100
                                     </span>
-                                    <ul className="space-y-0.5 text-emerald-200">
-                                      {q.strengths.length > 0 ? (
-                                        q.strengths.map((s, i) => <li key={i}>• {s}</li>)
-                                      ) : (
-                                        <li>• Addressed prompt with direct attempt</li>
+                                  </div>
+
+                                  {/* Candidate's Spoken Answer */}
+                                  <div className="p-3.5 rounded-xl bg-[#090d16] border border-slate-800 space-y-1">
+                                    <div className="flex items-center justify-between text-slate-400 font-semibold text-[11px]">
+                                      <span>Your Spoken Answer:</span>
+                                      {q.fillerWordCount > 0 && (
+                                        <span className="text-rose-400 font-bold">
+                                          {q.fillerWordCount} filler words detected
+                                        </span>
                                       )}
-                                    </ul>
+                                    </div>
+                                    <p className="text-slate-200 font-medium leading-relaxed italic">
+                                      &ldquo;{q.transcript}&rdquo;
+                                    </p>
                                   </div>
 
-                                  <div className="p-3.5 rounded-xl bg-amber-950/30 border border-amber-900/60 space-y-1">
-                                    <span className="font-bold text-amber-300 flex items-center gap-1.5">
-                                      <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
-                                      Opportunities to Sharpen
-                                    </span>
-                                    <ul className="space-y-0.5 text-amber-200">
-                                      {q.weaknesses.map((w, i) => (
-                                        <li key={i}>• {w}</li>
-                                      ))}
-                                    </ul>
-                                  </div>
-                                </div>
+                                  {/* Strengths & Opportunities (Hide fake strengths if skipped) */}
+                                  <div className={`grid gap-3 ${!isSkipped && q.strengths.length > 0 ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"}`}>
+                                    {!isSkipped && q.strengths.length > 0 && (
+                                      <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-900/60 space-y-1">
+                                        <span className="font-bold text-emerald-300 flex items-center gap-1.5">
+                                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                          What You Did Well
+                                        </span>
+                                        <ul className="space-y-0.5 text-emerald-200">
+                                          {q.strengths.map((s, i) => (
+                                            <li key={i}>• {s}</li>
+                                          ))}
+                                        </ul>
+                                      </div>
+                                    )}
 
-                                {/* Recommended Model Answer */}
-                                <div className="p-4 rounded-xl bg-indigo-950/30 border border-indigo-500/40 space-y-2">
-                                  <div className="flex items-center gap-1.5 text-indigo-300 font-bold">
-                                    <Sparkles className="w-4 h-4 text-indigo-400" />
-                                    <span>Recommended Model Answer:</span>
+                                    <div className="p-3.5 rounded-xl bg-amber-950/30 border border-amber-900/60 space-y-1">
+                                      <span className="font-bold text-amber-300 flex items-center gap-1.5">
+                                        <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                                        Areas to Sharpen
+                                      </span>
+                                      <ul className="space-y-0.5 text-amber-200">
+                                        {isSkipped ? (
+                                          <li>• You skipped this question without speaking. Giving even a 30-second answer gives the interviewer something positive to evaluate.</li>
+                                        ) : (
+                                          q.weaknesses.map((w, i) => <li key={i}>• {w}</li>)
+                                        )}
+                                      </ul>
+                                    </div>
                                   </div>
-                                  <div className="p-3.5 rounded-xl bg-[#090d16] border border-indigo-500/30 text-emerald-200 font-mono text-[11px] leading-relaxed whitespace-pre-wrap shadow-inner">
-                                    {q.improvedExample}
+
+                                  {/* Humanized Recommended Model Answer */}
+                                  <div className="p-4 rounded-xl bg-indigo-950/30 border border-indigo-500/40 space-y-2">
+                                    <div className="flex items-center gap-1.5 text-indigo-300 font-bold">
+                                      <Sparkles className="w-4 h-4 text-indigo-400" />
+                                      <span>Recommended Model Answer (Natural &amp; Conversational):</span>
+                                    </div>
+                                    <div className="p-3.5 rounded-xl bg-[#090d16] border border-indigo-500/30 text-emerald-200 text-xs leading-relaxed whitespace-pre-wrap shadow-inner font-sans">
+                                      {q.improvedExample}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         </div>
                       )}
