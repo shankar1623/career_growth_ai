@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { MessageSquareCheck, Sparkles, Compass, ArrowRight, Video, Loader2, AlertCircle } from "lucide-react";
+import { MessageSquareCheck, Compass, ArrowRight, Video, Loader2 } from "lucide-react";
 import { StrengthsWeaknessesCard } from "@/components/feedback/StrengthsWeaknessesCard";
-import { AnswerImprovementCard } from "@/components/feedback/AnswerImprovementCard";
 import { RoundFeedbackItem, ImprovementItem } from "@/types";
 
 interface EvaluationItem {
@@ -65,7 +64,7 @@ export default function FeedbackPage() {
     );
   }
 
-  if (!hasSession || answers.length === 0) {
+  if (!hasSession || (roundsFeedback.length === 0 && answers.length === 0)) {
     return (
       <div className="max-w-2xl mx-auto py-16 text-center space-y-4">
         <div className="w-16 h-16 rounded-3xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mx-auto shadow-xs">
@@ -110,37 +109,13 @@ export default function FeedbackPage() {
         </Link>
       </div>
 
-      {/* Round-by-Round 5-Round Diagnostic Cards */}
+      {/* Round-by-Round 5-Round Diagnostic Cards with Embedded Question Transcripts & Model Answers */}
       {(roundsFeedback.length > 0 || improvements.length > 0) && (
         <StrengthsWeaknessesCard
           roundsFeedback={roundsFeedback}
           improvements={improvements}
         />
       )}
-
-      {/* Granular Answer-by-Answer Improvements */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-sm">
-            <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-            <span>Real Question-by-Question Spoken Transcripts & Evaluations</span>
-          </div>
-          <span className="text-xs text-slate-500 dark:text-slate-400">{answers.length} questions evaluated</span>
-        </div>
-
-        <div className="space-y-4">
-          {answers.map((ans, idx) => (
-            <AnswerImprovementCard
-              key={idx}
-              orderNumber={idx + 1}
-              questionText={ans.questionText}
-              roundTitle={ans.roundTitle}
-              transcript={ans.transcript}
-              evaluation={ans.evaluation}
-            />
-          ))}
-        </div>
-      </div>
     </div>
   );
 }

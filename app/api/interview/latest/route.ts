@@ -148,6 +148,40 @@ export async function GET() {
         roundScore = Math.max(30, latestInterview.overallScore || 70);
       }
 
+      const roundQuestions = r.questions.map((q) => {
+        const latestAns = q.answers[0];
+        let strengths: string[] = [];
+        let weaknesses: string[] = [];
+        try {
+          if (latestAns?.strengths) strengths = JSON.parse(latestAns.strengths);
+          if (latestAns?.weaknesses) weaknesses = JSON.parse(latestAns.weaknesses);
+        } catch {}
+
+        const specificModelAnswer = getRecommendedModelAnswer(q.questionText, r.roundType);
+
+        let finalImprovedExample = latestAns?.improvedExample;
+        if (
+          !finalImprovedExample ||
+          finalImprovedExample.startsWith("Use the STAR") ||
+          finalImprovedExample.includes("In my experience, I always approach this methodically")
+        ) {
+          finalImprovedExample = specificModelAnswer;
+        }
+
+        return {
+          questionText: q.questionText,
+          transcript: latestAns?.userTranscript || "(Question Skipped / No answer provided)",
+          score: latestAns?.score ?? 0,
+          clarityScore: latestAns?.clarityScore ?? 0,
+          relevanceScore: latestAns?.relevanceScore ?? 0,
+          fillerWordCount: latestAns?.fillerWordCount ?? 0,
+          feedback: latestAns?.feedback || (latestAns ? "Evaluation complete." : "Question was skipped without an answer."),
+          strengths,
+          weaknesses: weaknesses.length > 0 ? weaknesses : (latestAns ? [] : ["No spoken answer was provided."]),
+          improvedExample: finalImprovedExample,
+        };
+      });
+
       const isGood = roundScore >= 50;
 
       return {
@@ -161,6 +195,7 @@ export async function GET() {
         whyItMatters: meta.whyItMatters,
         betterExample: meta.betterExample,
         howToPractice: meta.howToPractice,
+        questions: roundQuestions,
       };
     });
 

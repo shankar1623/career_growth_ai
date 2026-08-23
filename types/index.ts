@@ -150,6 +150,19 @@ export interface ImprovementItem {
   howToPractice: string;
 }
 
+export interface RoundQuestionFeedbackItem {
+  questionText: string;
+  transcript: string;
+  score: number;
+  clarityScore: number;
+  relevanceScore: number;
+  fillerWordCount: number;
+  feedback: string;
+  strengths: string[];
+  weaknesses: string[];
+  improvedExample: string;
+}
+
 export interface RoundFeedbackItem {
   roundNumber: number;
   roundType: string;
@@ -161,6 +174,7 @@ export interface RoundFeedbackItem {
   whyItMatters: string;
   betterExample: string;
   howToPractice: string;
+  questions?: RoundQuestionFeedbackItem[];
 }
 
 export interface InterviewFinalEvaluation {

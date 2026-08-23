@@ -1,6 +1,19 @@
 "use client";
 
-import { AlertTriangle, BookOpen, CheckCircle2, Target, Sparkles, Lightbulb, Video, ShieldAlert, Award } from "lucide-react";
+import { useState } from "react";
+import {
+  AlertTriangle,
+  BookOpen,
+  CheckCircle2,
+  Lightbulb,
+  ShieldAlert,
+  ChevronDown,
+  ChevronUp,
+  MessageSquare,
+  Sparkles,
+  HelpCircle,
+  Video,
+} from "lucide-react";
 import { RoundFeedbackItem, ImprovementItem } from "@/types";
 
 interface StrengthsWeaknessesCardProps {
@@ -12,51 +25,74 @@ export function StrengthsWeaknessesCard({
   roundsFeedback = [],
   improvements = [],
 }: StrengthsWeaknessesCardProps) {
+  // Track expanded state for each round (default all expanded to true)
+  const [expandedRounds, setExpandedRounds] = useState<Record<number, boolean>>({
+    1: true,
+    2: true,
+    3: true,
+    4: true,
+    5: true,
+  });
+
+  const toggleRound = (roundNumber: number) => {
+    setExpandedRounds((prev) => ({
+      ...prev,
+      [roundNumber]: !prev[roundNumber],
+    }));
+  };
+
   const hasRounds = roundsFeedback && roundsFeedback.length > 0;
 
   return (
     <div className="space-y-6">
-      <div className="bg-[#0b0f19] dark:bg-[#0b0f19] p-5 sm:p-8 rounded-3xl border border-slate-800 shadow-2xl transition-colors">
-        {/* Header */}
+      <div className="bg-[#0b0f19] dark:bg-[#0b0f19] p-4 sm:p-7 rounded-3xl border border-slate-800 shadow-2xl transition-colors">
+        {/* Main Section Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 border-b border-slate-800/80 pb-4">
           <div className="flex items-center gap-2.5 text-amber-400 font-extrabold text-sm uppercase tracking-wider">
             <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center">
               <AlertTriangle className="w-4 h-4" />
             </div>
-            <span>Round-by-Round Performance Diagnostics & Actionable Practice</span>
+            <span>5-Round Performance Review & Question Analysis</span>
           </div>
           <span className="text-xs font-bold text-slate-300 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full">
-            All 5 Rounds Evaluated
+            All 5 Rounds (Click to Expand / Collapse)
           </span>
         </div>
 
-        {/* Round Cards */}
+        {/* 5-Round Diagnostic Cards */}
         <div className="space-y-6">
           {hasRounds ? (
             roundsFeedback.map((round) => {
               const isGood = round.score >= 50;
+              const isExpanded = expandedRounds[round.roundNumber] ?? true;
+              const questions = round.questions || [];
 
               return (
                 <div
                   key={round.roundNumber}
-                  className="rounded-3xl border border-indigo-500/30 bg-[#0f172a] shadow-xl overflow-hidden divide-y divide-slate-800 text-xs transition-all"
+                  className="rounded-3xl border border-indigo-500/30 bg-[#0f172a] shadow-xl overflow-hidden text-xs transition-all"
                 >
-                  {/* Round Top Header Bar with Score & Status */}
-                  <div className="p-4 sm:p-5 bg-slate-900/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  {/* Round Top Header Bar with Clickable Toggle */}
+                  <div
+                    onClick={() => toggleRound(round.roundNumber)}
+                    className="p-4 sm:p-5 bg-slate-900/90 hover:bg-slate-900 cursor-pointer flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800 transition-colors"
+                  >
                     <div className="flex items-center gap-3">
                       <div className="w-9 h-9 rounded-2xl bg-indigo-600 text-white font-black text-xs flex items-center justify-center shadow-md shadow-indigo-500/30 shrink-0">
                         R{round.roundNumber}
                       </div>
                       <div>
-                        <h4 className="text-sm font-black text-white">{round.title}</h4>
+                        <h4 className="text-sm font-black text-white flex items-center gap-2">
+                          <span>{round.title}</span>
+                        </h4>
                         <span className="text-[11px] text-slate-400 font-medium">
-                          5-Round Technical Evaluation
+                          {questions.length > 0 ? `${questions.length} Question(s) Evaluated` : "Technical Round Evaluation"}
                         </span>
                       </div>
                     </div>
 
-                    {/* Score & Threshold Badge: 50+ Good / Less than 50 Weak */}
-                    <div className="flex items-center gap-2 shrink-0">
+                    {/* Score & Threshold Badge (50+ Good / Less than 50 Weak) + Chevron */}
+                    <div className="flex items-center gap-3 shrink-0">
                       {isGood ? (
                         <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 font-bold text-xs shadow-xs">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
@@ -68,47 +104,145 @@ export function StrengthsWeaknessesCard({
                           <span>Score: {round.score}/100 • Weak (Needs Improvement)</span>
                         </div>
                       )}
+
+                      <div className="p-1.5 rounded-lg bg-slate-800 text-slate-400 hover:text-white transition-colors">
+                        {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </div>
                     </div>
                   </div>
 
-                  {/* 1. Problem Identification */}
-                  <div className="p-5 bg-rose-950/25 flex items-start gap-3.5">
-                    <div className="w-7 h-7 rounded-xl bg-rose-900/60 border border-rose-700/60 text-rose-300 font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
-                      !
-                    </div>
-                    <div>
-                      <span className="font-extrabold text-rose-300 uppercase tracking-wider text-[11px] block mb-1">
-                        Identified Diagnostic Focus Area
-                      </span>
-                      <p className="text-white leading-relaxed font-semibold text-sm">{round.problem}</p>
-                    </div>
-                  </div>
+                  {/* Expandable Round Content */}
+                  {isExpanded && (
+                    <div className="divide-y divide-slate-800 animate-in fade-in duration-200">
+                      {/* 1. Problem Identification */}
+                      <div className="p-5 bg-rose-950/25 flex items-start gap-3.5">
+                        <div className="w-7 h-7 rounded-xl bg-rose-900/60 border border-rose-700/60 text-rose-300 font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
+                          !
+                        </div>
+                        <div>
+                          <span className="font-extrabold text-rose-300 uppercase tracking-wider text-[11px] block mb-1">
+                            Identified Diagnostic Focus Area
+                          </span>
+                          <p className="text-white leading-relaxed font-semibold text-sm">{round.problem}</p>
+                        </div>
+                      </div>
 
-                  {/* 2. Why It Matters to Interviewers */}
-                  <div className="p-5 bg-amber-950/20 flex items-start gap-3.5">
-                    <div className="w-7 h-7 rounded-xl bg-amber-900/60 border border-amber-700/60 text-amber-300 font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
-                      <Lightbulb className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <span className="font-extrabold text-amber-300 uppercase tracking-wider text-[11px] block mb-1">
-                        Why Top Tech Interviewers Care
-                      </span>
-                      <p className="text-slate-300 leading-relaxed font-medium">{round.whyItMatters}</p>
-                    </div>
-                  </div>
+                      {/* 2. Why It Matters to Interviewers */}
+                      <div className="p-5 bg-amber-950/20 flex items-start gap-3.5">
+                        <div className="w-7 h-7 rounded-xl bg-amber-900/60 border border-amber-700/60 text-amber-300 font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
+                          <Lightbulb className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <span className="font-extrabold text-amber-300 uppercase tracking-wider text-[11px] block mb-1">
+                            Why Top Tech Interviewers Care
+                          </span>
+                          <p className="text-slate-300 leading-relaxed font-medium">{round.whyItMatters}</p>
+                        </div>
+                      </div>
 
-                  {/* 3. Actionable Practice & Master Strategy */}
-                  <div className="p-5 bg-indigo-950/25 flex items-start gap-3.5">
-                    <div className="w-7 h-7 rounded-xl bg-indigo-900/60 border border-indigo-700/60 text-indigo-300 font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
-                      <BookOpen className="w-4 h-4" />
+                      {/* 3. Actionable Practice & Master Strategy */}
+                      <div className="p-5 bg-indigo-950/25 flex items-start gap-3.5">
+                        <div className="w-7 h-7 rounded-xl bg-indigo-900/60 border border-indigo-700/60 text-indigo-300 font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
+                          <BookOpen className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <span className="font-extrabold text-indigo-300 uppercase tracking-wider text-[11px] block mb-1">
+                            How to Practice & Master Round {round.roundNumber}
+                          </span>
+                          <p className="text-slate-300 leading-relaxed font-medium">{round.howToPractice}</p>
+                        </div>
+                      </div>
+
+                      {/* 4. Questions, Spoken Answers & Recommended Model Answers for this Round */}
+                      {questions.length > 0 && (
+                        <div className="p-5 bg-[#090d16] space-y-4">
+                          <div className="flex items-center gap-2 text-indigo-400 font-bold text-xs uppercase tracking-wider">
+                            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                            <span>Round {round.roundNumber} Questions, Spoken Answers & Recommended Model Answers</span>
+                          </div>
+
+                          <div className="space-y-4">
+                            {questions.map((q, qIdx) => (
+                              <div
+                                key={qIdx}
+                                className="p-4 sm:p-5 rounded-2xl bg-[#0f172a] border border-slate-800 space-y-4 shadow-md text-xs"
+                              >
+                                {/* Question Title & Score */}
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                                  <div className="flex items-start gap-2.5">
+                                    <span className="w-6 h-6 rounded-lg bg-indigo-900/60 text-indigo-300 font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                                      Q{qIdx + 1}
+                                    </span>
+                                    <h5 className="text-xs sm:text-sm font-bold text-white leading-snug">
+                                      {q.questionText}
+                                    </h5>
+                                  </div>
+                                  <span className="px-3 py-1 rounded-xl bg-indigo-950 border border-indigo-700 text-indigo-300 font-bold text-xs shrink-0">
+                                    Score: {q.score}/100
+                                  </span>
+                                </div>
+
+                                {/* Candidate's Spoken Answer */}
+                                <div className="p-3.5 rounded-xl bg-[#090d16] border border-slate-800 space-y-1">
+                                  <div className="flex items-center justify-between text-slate-400 font-semibold text-[11px]">
+                                    <span>Your Spoken Answer:</span>
+                                    {q.fillerWordCount > 0 && (
+                                      <span className="text-rose-400 font-bold">
+                                        {q.fillerWordCount} filler words detected
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-slate-200 font-medium leading-relaxed italic">
+                                    &ldquo;{q.transcript}&rdquo;
+                                  </p>
+                                </div>
+
+                                {/* Strengths & Opportunities */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                  <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-900/60 space-y-1">
+                                    <span className="font-bold text-emerald-300 flex items-center gap-1.5">
+                                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                                      Observed Strengths
+                                    </span>
+                                    <ul className="space-y-0.5 text-emerald-200">
+                                      {q.strengths.length > 0 ? (
+                                        q.strengths.map((s, i) => <li key={i}>• {s}</li>)
+                                      ) : (
+                                        <li>• Addressed prompt with direct attempt</li>
+                                      )}
+                                    </ul>
+                                  </div>
+
+                                  <div className="p-3.5 rounded-xl bg-amber-950/30 border border-amber-900/60 space-y-1">
+                                    <span className="font-bold text-amber-300 flex items-center gap-1.5">
+                                      <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                                      Opportunities to Sharpen
+                                    </span>
+                                    <ul className="space-y-0.5 text-amber-200">
+                                      {q.weaknesses.map((w, i) => (
+                                        <li key={i}>• {w}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                </div>
+
+                                {/* Recommended Model Answer */}
+                                <div className="p-4 rounded-xl bg-indigo-950/30 border border-indigo-500/40 space-y-2">
+                                  <div className="flex items-center gap-1.5 text-indigo-300 font-bold">
+                                    <Sparkles className="w-4 h-4 text-indigo-400" />
+                                    <span>Recommended Model Answer:</span>
+                                  </div>
+                                  <div className="p-3.5 rounded-xl bg-[#090d16] border border-indigo-500/30 text-emerald-200 font-mono text-[11px] leading-relaxed whitespace-pre-wrap shadow-inner">
+                                    {q.improvedExample}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <span className="font-extrabold text-indigo-300 uppercase tracking-wider text-[11px] block mb-1">
-                        How to Practice & Master Round {round.roundNumber}
-                      </span>
-                      <p className="text-slate-300 leading-relaxed font-medium">{round.howToPractice}</p>
-                    </div>
-                  </div>
+                  )}
                 </div>
               );
             })
