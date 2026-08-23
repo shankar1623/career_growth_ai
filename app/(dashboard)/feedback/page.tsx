@@ -99,9 +99,6 @@ export default function FeedbackPage() {
           <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
             Performance Review & Round Diagnostics
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
-            Round-by-round score diagnostics (50+ Good / Less than 50 Weak) with senior exemplary model answers and actionable practice strategies.
-          </p>
         </div>
 
         <Link
