@@ -65,22 +65,56 @@ export function getRecommendedModelAnswer(
       ? `In my recent experience with ${context.workExperience}, I contributed to building scalable features and optimizing backend performance.`
       : `In my recent project work on ${candProject}, I took ownership of designing core component architecture and database indexing, which cut response times by over 35% under peak user traffic.`;
 
-    return `Hi, thank you for giving me this opportunity to introduce myself. My name is ${candName}. I am ${candEdu.startsWith("pursuing") || candEdu.startsWith("currently") ? candEdu : `holding a degree in Computer Science & Engineering`} and specialize as a ${candRole}, working primarily with ${skillsPhrase}. Over the past few years, I have focused on building responsive, high-performance web applications. ${projectOrExp} What really drives me as an engineer is taking complex, ambiguous problems and turning them into clean, reliable software that users love, and I'm super excited about the opportunity to contribute to your engineering team.`;
+    return `Hi, thank you for giving me this opportunity to introduce myself. My name is ${candName}. I am ${candEdu.startsWith("pursuing") || candEdu.startsWith("currently") ? candEdu : `holding a degree in Computer Science & Engineering`} and specialize as a ${candRole}, working primarily with ${skillsPhrase}.
+
+Over the past few years, I have focused on building responsive, high-performance web applications. ${projectOrExp}
+
+What really drives me as an engineer is taking complex, ambiguous problems and turning them into clean, reliable software that users love, and I'm super excited about the opportunity to contribute to your engineering team.`;
   }
 
   // 3. Motivation for Role & Challenges / Career Goals
   if (qLower.includes("interested in applying") || qLower.includes("why are you interested") || qLower.includes("career goals") || qLower.includes("technical challenges excite you") || qLower.includes("key career goals")) {
-    return `Throughout my journey working with ${skillsPhrase}, I've always looked for opportunities where I can solve meaningful problems at scale. What specifically attracts me to this ${candRole} role is the opportunity to bring my hands-on experience in ${candProject} to build reliable, high-throughput systems. In the short term, I want to dive deep into your codebase, contribute to core product features, and ensure high system reliability. Looking ahead over the next 3 to 5 years, my goal is to grow into a senior technical lead who helps architect distributed services, mentors newer engineers, and works closely with product leaders to shape our technical roadmap.`;
+    return `Throughout my journey working with ${skillsPhrase}, I've always looked for opportunities where I can solve meaningful problems at scale. What specifically attracts me to this ${candRole} role is the opportunity to bring my hands-on experience in ${candProject} to build reliable, high-throughput systems.
+
+In the short term, I want to dive deep into your codebase, contribute to core product features, and ensure high system reliability.
+
+Looking ahead over the next 3 to 5 years, my goal is to grow into a senior technical lead who helps architect distributed services, mentors newer engineers, and works closely with product leaders to shape our technical roadmap.`;
   }
 
   // 4. Project Architecture & State Management (Round 2 Deep-Dive)
   if (qLower.includes("architecture of your most challenging project") || qLower.includes("most technically complex project") || qLower.includes("walk me through the architecture") || qLower.includes("regarding your experience")) {
-    return `I'd love to walk you through ${candProject}. The primary architectural challenge was coordinating real-time user interactions, asynchronous data processing, and state management without introducing UI lag or latency bottlenecks. I structured the frontend with Next.js App Router and custom React hooks for reactive state updates, while keeping our Node.js backend modular and decoupled. On the data layer, we used PostgreSQL with connection pooling. When we noticed query latency under high concurrent traffic, I added composite B-Tree indexes and optimized our API response payloads, bringing our p99 query latency down from 420ms to 45ms.`;
+    return `I'd love to walk you through ${candProject}. The primary architectural challenge was coordinating real-time user interactions, asynchronous data processing, and state management without introducing UI lag or latency bottlenecks.
+
+On the frontend, I structured the application using Next.js App Router and custom React hooks for reactive state updates, while keeping our Node.js backend modular and decoupled. On the data layer, we used PostgreSQL with connection pooling.
+
+When we noticed query latency under high concurrent traffic, I added composite B-Tree indexes and optimized our API response payloads, bringing our p99 query latency down from 420ms to 45ms.`;
   }
 
   // 5. Difficult Bug / Performance Bottleneck (Round 2 Deep-Dive)
   if (qLower.includes("difficult technical bug") || qLower.includes("performance bottleneck") || qLower.includes("troubleshooting") || qLower.includes("production bug") || qLower.includes("optimize resource consumption") || qLower.includes("difficult bug")) {
-    return `In our work on ${candProject}, our team ran into a critical performance bottleneck during load testing where our main endpoint slowed down from 200ms to nearly 3 seconds under concurrent traffic. I jumped into DevTools network traces and ran EXPLAIN ANALYZE on our PostgreSQL queries. I discovered that an unindexed foreign key was triggering a sequential full table scan on every request, causing an N+1 fetching loop. I created a composite index on (user_id, created_at) and refactored our query layer to eager-load related records in a single batch. That brought our average query execution time down to 28ms—a 98% reduction—and completely eliminated our server CPU spikes.`;
+    return `In our work on ${candProject}, our team ran into a critical performance bottleneck during load testing where our main endpoint slowed down from 200ms to nearly 3 seconds under concurrent traffic.
+
+I jumped into DevTools network traces and ran EXPLAIN ANALYZE on our PostgreSQL queries. I discovered that an unindexed foreign key was triggering a sequential full table scan on every request, causing an N+1 fetching loop.
+
+I created a composite index on (user_id, created_at) and refactored our query layer to eager-load related records in a single batch. That brought our average query execution time down to 28ms—a 98% reduction—and completely eliminated our server CPU spikes.`;
+  }
+
+  // 6. Automated Testing / CI/CD (Round 2 alternative)
+  if (qLower.includes("automated testing") || qLower.includes("continuous integration") || qLower.includes("edge-case stability")) {
+    return `For ${candProject}, I established a test pyramid strategy with Jest and React Testing Library for unit and component tests, coupled with Playwright for critical end-to-end user flows.
+
+I integrated automated test execution and lint checks into our GitHub Actions CI/CD pipeline, ensuring that all pull requests pass type-checking and automated regression suites before merging.
+
+This practice caught boundary bugs early in the development cycle and maintained high release stability in production.`;
+  }
+
+  // 7. 10x Scale / Concurrency Redesign (Round 2 alternative)
+  if (qLower.includes("redesigning") || qLower.includes("10x higher") || qLower.includes("concurrency") || qLower.includes("scale")) {
+    return `To scale ${candProject} for 10x higher concurrency, the first bottleneck I would address is database read throughput. I would implement a Redis caching layer for hot read queries with cache invalidation on write mutations, offloading up to 80% of database reads.
+
+Second, I would introduce read replicas with connection pooling in PostgreSQL to distribute read/write traffic.
+
+Finally, for asynchronous workloads like email notifications or background data processing, I would decouple task execution using a message queue like BullMQ or Amazon SQS to keep HTTP endpoints lightweight and fast.`;
   }
 
   // 6. Asynchronous JavaScript & Event Loop
