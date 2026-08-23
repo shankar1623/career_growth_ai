@@ -5,6 +5,7 @@ import Link from "next/link";
 import { MessageSquareCheck, Sparkles, Compass, ArrowRight, Video, Loader2, AlertCircle } from "lucide-react";
 import { StrengthsWeaknessesCard } from "@/components/feedback/StrengthsWeaknessesCard";
 import { AnswerImprovementCard } from "@/components/feedback/AnswerImprovementCard";
+import { RoundFeedbackItem, ImprovementItem } from "@/types";
 
 interface EvaluationItem {
   score: number;
@@ -26,10 +27,8 @@ interface AnswerItem {
 
 export default function FeedbackPage() {
   const [isLoading, setIsLoading] = useState(true);
-  const [strengths, setStrengths] = useState<string[]>([]);
-  const [improvements, setImprovements] = useState<
-    { problem: string; whyItMatters: string; betterExample: string; howToPractice: string }[]
-  >([]);
+  const [roundsFeedback, setRoundsFeedback] = useState<RoundFeedbackItem[]>([]);
+  const [improvements, setImprovements] = useState<ImprovementItem[]>([]);
   const [answers, setAnswers] = useState<AnswerItem[]>([]);
   const [targetRole, setTargetRole] = useState("Software Engineer");
   const [hasSession, setHasSession] = useState(false);
@@ -43,7 +42,7 @@ export default function FeedbackPage() {
         if (data.interview) {
           setHasSession(true);
           setTargetRole(data.interview.targetRole || "Software Engineer");
-          setStrengths(data.interview.strengths || []);
+          setRoundsFeedback(data.interview.roundsFeedback || []);
           setImprovements(data.interview.improvements || []);
           setAnswers(data.interview.answers || []);
         }
@@ -89,7 +88,7 @@ export default function FeedbackPage() {
   }
 
   return (
-    <div className="space-y-8 pb-8">
+    <div className="space-y-8 pb-8 w-full max-w-full overflow-hidden">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
@@ -98,10 +97,10 @@ export default function FeedbackPage() {
             <span>AI Diagnostic Feedback Studio ({targetRole})</span>
           </div>
           <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-            Performance Review & Answer Improvements
+            Performance Review & Round Diagnostics
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Actionable breakdowns of your real spoken answers, detected gaps, and structured model rewrites.
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Round-by-round score diagnostics (50+ Good / Less than 50 Weak) with senior exemplary model answers and actionable practice strategies.
           </p>
         </div>
 
@@ -114,19 +113,22 @@ export default function FeedbackPage() {
         </Link>
       </div>
 
-      {/* Detailed Actionable Engineering Improvement Plan */}
-      {improvements.length > 0 ? (
-        <StrengthsWeaknessesCard improvements={improvements} />
-      ) : null}
+      {/* Round-by-Round 5-Round Diagnostic Cards */}
+      {(roundsFeedback.length > 0 || improvements.length > 0) && (
+        <StrengthsWeaknessesCard
+          roundsFeedback={roundsFeedback}
+          improvements={improvements}
+        />
+      )}
 
       {/* Granular Answer-by-Answer Improvements */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-sm">
             <Sparkles className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-            <span>Real Answer-by-Answer Improvements</span>
+            <span>Real Question-by-Question Spoken Transcripts & Evaluations</span>
           </div>
-          <span className="text-xs text-slate-500 dark:text-slate-400">{answers.length} questions in latest session</span>
+          <span className="text-xs text-slate-500 dark:text-slate-400">{answers.length} questions evaluated</span>
         </div>
 
         <div className="space-y-4">

@@ -150,6 +150,19 @@ export interface ImprovementItem {
   howToPractice: string;
 }
 
+export interface RoundFeedbackItem {
+  roundNumber: number;
+  roundType: string;
+  title: string;
+  score: number;
+  isGood: boolean;
+  statusText: string;
+  problem: string;
+  whyItMatters: string;
+  betterExample: string;
+  howToPractice: string;
+}
+
 export interface InterviewFinalEvaluation {
   overallScore: number;
   communicationScore: number;
