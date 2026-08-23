@@ -114,9 +114,9 @@ export default function FeedbackPage() {
         </Link>
       </div>
 
-      {/* Strengths & Weaknesses Detailed Cards */}
-      {strengths.length > 0 || improvements.length > 0 ? (
-        <StrengthsWeaknessesCard strengths={strengths} improvements={improvements} />
+      {/* Detailed Actionable Engineering Improvement Plan */}
+      {improvements.length > 0 ? (
+        <StrengthsWeaknessesCard improvements={improvements} />
       ) : null}
 
       {/* Granular Answer-by-Answer Improvements */}
