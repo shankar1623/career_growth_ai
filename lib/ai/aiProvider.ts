@@ -367,23 +367,37 @@ export async function evaluateSpokenAnswer(
     return evaluateSmartSpokenAnswer(questionText, transcript, roundType);
   }
 
+  const wordCount = cleanTranscript.split(/\s+/).filter(Boolean).length;
+  if (wordCount < 4) {
+    // If answer is only 1-3 words, immediately apply strict failing evaluation
+    return evaluateSmartSpokenAnswer(questionText, cleanTranscript, roundType);
+  }
+
   try {
-    const prompt = `Evaluate this spoken interview answer transcript and return a valid JSON:
+    const prompt = `You are a Principal Technical Interviewer evaluating a candidate's spoken response.
+Strictly grade the technical accuracy, depth, and relevance of the User Answer against the Question.
+
+CRITICAL SCORING RULES:
+1. If the User Answer is very brief (under 10 words), gibberish, off-topic, or incorrect, assign a FAIL score between 0 and 20. Do NOT give fake strengths like "minimal filler words".
+2. If the User Answer is detailed, accurately explains technical concepts, architecture, trade-offs, and outcomes, assign a score between 75 and 100.
+3. Compare the candidate's keywords and depth against the expected engineering standards.
+
+Return strictly valid JSON only matching this schema:
 {
   "score": number (0-100),
   "clarityScore": number (0-100),
   "relevanceScore": number (0-100),
   "fillerWordCount": number,
   "detectedFillerWords": string[],
-  "feedback": string,
-  "strengths": string[],
-  "weaknesses": string[],
-  "improvedExample": string,
+  "feedback": string (honest, constructive engineering feedback),
+  "strengths": string[] (concrete strengths if deserved, or empty array if answer was deficient),
+  "weaknesses": string[] (specific technical gaps and missing elements),
+  "improvedExample": string (exemplary senior-level answer with code/architecture details),
   "starAnalysis": { "situation": string, "task": string, "action": string, "result": string }
 }
 
 Question: "${questionText}"
-User Answer: "${cleanTranscript}"`;
+User Spoken Answer: "${cleanTranscript}"`;
 
     const aiResponse = await executeAIPrompt(prompt);
     const parsed = extractJsonFromResponse<AnswerEvaluationResult>(aiResponse);

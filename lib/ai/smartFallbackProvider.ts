@@ -1026,51 +1026,106 @@ export function evaluateSmartSpokenAnswer(
     };
   }
 
-  const wordCount = cleanTranscript.split(/\s+/).length;
+  const words = cleanTranscript.toLowerCase().split(/\s+/).filter(Boolean);
+  const wordCount = words.length;
+
   const fillerRegex = /\b(um|uh|like|you know|basically|actually|sort of|kind of|i mean)\b/gi;
   const matches = cleanTranscript.match(fillerRegex) || [];
   const fillerWordCount = matches.length;
   const uniqueFillers = Array.from(new Set(matches.map((m) => m.toLowerCase())));
 
-  const isShort = wordCount < 10;
-  const isGoodLength = wordCount >= 25 && wordCount <= 220;
+  // Extract core keywords from question and model answer
+  const stopWords = new Set(["the", "and", "a", "an", "in", "on", "at", "to", "for", "of", "with", "is", "was", "are", "were", "you", "your", "my", "i", "we", "our", "that", "this", "can", "how", "what", "why", "when", "where", "about", "tell", "describe", "walk", "through", "project", "most", "challenging"]);
+  const referenceText = (questionText + " " + modelAnswer).toLowerCase();
+  const rawKeyTokens = referenceText.replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter((w) => w.length > 3 && !stopWords.has(w));
+  const uniqueKeywords = Array.from(new Set(rawKeyTokens));
 
-  let baseScore = 70;
-  if (isGoodLength) baseScore += 15;
-  if (isShort) baseScore -= 35;
-  baseScore -= Math.min(25, fillerWordCount * 4);
+  const matchedKeywords = uniqueKeywords.filter((kw) => cleanTranscript.toLowerCase().includes(kw));
+  const matchRatio = uniqueKeywords.length > 0 ? matchedKeywords.length / Math.min(12, uniqueKeywords.length) : 0;
 
-  const score = Math.min(95, Math.max(10, baseScore));
-  const clarityScore = Math.min(95, Math.max(15, 85 - fillerWordCount * 5));
-  const relevanceScore = Math.min(95, Math.max(20, cleanTranscript.length > 40 ? 85 : 45));
+  // STRICT RULE: Short or unrelated responses (< 6 words) fail immediately
+  if (wordCount < 6) {
+    return {
+      score: 10,
+      clarityScore: 20,
+      relevanceScore: 10,
+      fillerWordCount,
+      detectedFillerWords: uniqueFillers,
+      feedback: `Your response was only ${wordCount} word(s) ("${cleanTranscript}"). A technical interview answer must provide comprehensive architectural details, technologies used, and outcomes.`,
+      strengths: [],
+      weaknesses: [
+        `Response was only ${wordCount} words; missed explaining technical architecture and implementation.`,
+        "Provide at least 3-5 complete sentences using concrete engineering terminology.",
+        "Review the recommended model answer below to master this topic.",
+      ],
+      improvedExample: modelAnswer,
+      starAnalysis: {
+        situation: "State the project domain and scale clearly.",
+        task: "Define the core architectural problem you addressed.",
+        action: "Detail your specific technology stack, schemas, and API design.",
+        result: "State measurable latency reductions or user metrics.",
+      },
+    };
+  }
+
+  // Calculate intelligent score based on keyword match & depth
+  let calculatedScore = 20;
+
+  if (wordCount >= 25) calculatedScore += 25;
+  else if (wordCount >= 12) calculatedScore += 15;
+  else calculatedScore += 5;
+
+  // Keyword relevance contribution (up to 45 points)
+  calculatedScore += Math.round(Math.min(1, matchRatio) * 45);
+
+  // Bonus for detailed engineering articulation (> 60 words)
+  if (wordCount >= 60 && matchedKeywords.length >= 3) {
+    calculatedScore += 10;
+  }
+
+  // Penalty for excessive filler words
+  calculatedScore -= Math.min(15, fillerWordCount * 3);
+
+  const finalScore = Math.min(95, Math.max(15, calculatedScore));
+  const clarityScore = Math.min(95, Math.max(20, 85 - fillerWordCount * 4));
+  const relevanceScore = Math.min(95, Math.max(15, Math.round(matchRatio * 85) + 15));
 
   const strengths: string[] = [];
   const weaknesses: string[] = [];
 
-  if (wordCount >= 20) {
-    strengths.push("Addressed the core subject of the question");
-  }
-  if (fillerWordCount <= 1) {
-    strengths.push("Maintained smooth conversational flow with minimal filler words");
-  } else {
-    weaknesses.push(`Detected ${fillerWordCount} filler words (${uniqueFillers.join(", ")})—aim to pause silently instead`);
+  if (finalScore >= 50) {
+    if (matchedKeywords.length >= 3) {
+      strengths.push(`Addressed key technical concepts: ${matchedKeywords.slice(0, 4).join(", ")}`);
+    }
+    if (wordCount >= 30) {
+      strengths.push("Provided sufficient technical depth with structured context");
+    }
+    if (fillerWordCount <= 1 && wordCount >= 20) {
+      strengths.push("Maintained smooth and confident delivery");
+    }
   }
 
-  if (isShort) {
-    weaknesses.push("Answer was very brief; provide concrete examples, metrics, or technical context");
+  if (matchedKeywords.length < 2) {
+    weaknesses.push("Did not mention specific frameworks, database schemas, or system protocols relevant to the question");
+  }
+  if (wordCount < 25) {
+    weaknesses.push("Response was too brief; expand on trade-offs and engineering decisions");
+  }
+  if (fillerWordCount > 2) {
+    weaknesses.push(`Detected ${fillerWordCount} filler words (${uniqueFillers.join(", ")})—aim to pause silently`);
   }
 
   return {
-    score,
+    score: finalScore,
     clarityScore,
     relevanceScore,
     fillerWordCount,
     detectedFillerWords: uniqueFillers,
-    feedback: isShort
-      ? "Good start, but expand your response with specific technical details and measurable results."
-      : "Solid answer with clear communication. Focus on structuring your narrative with the STAR method for maximum recruiter impact.",
-    strengths: strengths.length > 0 ? strengths : ["Communicated clearly with positive intent"],
-    weaknesses: weaknesses.length > 0 ? weaknesses : ["Could incorporate more quantifiable metrics"],
+    feedback: finalScore >= 50
+      ? `Solid response covering relevant concepts (${matchedKeywords.slice(0, 3).join(", ") || "core principles"}). Focus on the STAR method to quantify results.`
+      : `Response scored ${finalScore}/100 due to brief technical depth. Review the recommended model answer to practice incorporating specific technologies, architectural trade-offs, and metrics.`,
+    strengths,
+    weaknesses: weaknesses.length > 0 ? weaknesses : ["Could incorporate more quantifiable before-and-after business metrics"],
     improvedExample: modelAnswer,
     starAnalysis: {
       situation: "Set context clearly at the start of your answer.",
