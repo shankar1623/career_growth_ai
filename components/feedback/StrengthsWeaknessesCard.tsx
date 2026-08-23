@@ -12,7 +12,6 @@ export function StrengthsWeaknessesCard({
   roundsFeedback = [],
   improvements = [],
 }: StrengthsWeaknessesCardProps) {
-  // If round-by-round items exist, render all 5 rounds with exact score indicators (>= 50 Good, < 50 Weak)
   const hasRounds = roundsFeedback && roundsFeedback.length > 0;
 
   return (
@@ -24,7 +23,7 @@ export function StrengthsWeaknessesCard({
             <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center">
               <AlertTriangle className="w-4 h-4" />
             </div>
-            <span>Round-by-Round Performance Diagnostics & Master Plans</span>
+            <span>Round-by-Round Performance Diagnostics & Actionable Practice</span>
           </div>
           <span className="text-xs font-bold text-slate-300 bg-slate-900 border border-slate-800 px-3 py-1 rounded-full">
             All 5 Rounds Evaluated
@@ -98,22 +97,7 @@ export function StrengthsWeaknessesCard({
                     </div>
                   </div>
 
-                  {/* 3. Exemplary Senior Engineer Model Answer */}
-                  <div className="p-5 bg-emerald-950/25 flex items-start gap-3.5">
-                    <div className="w-7 h-7 rounded-xl bg-emerald-900/60 border border-emerald-700/60 text-emerald-300 font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
-                      <CheckCircle2 className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <span className="font-extrabold text-emerald-300 uppercase tracking-wider text-[11px] block mb-1.5">
-                        Better Exemplary Senior Response (Model Answer)
-                      </span>
-                      <div className="p-4 rounded-2xl bg-[#090d16] border border-emerald-500/30 text-emerald-200 font-mono text-xs leading-relaxed shadow-inner">
-                        {round.betterExample}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 4. Actionable Practice & Master Strategy */}
+                  {/* 3. Actionable Practice & Master Strategy */}
                   <div className="p-5 bg-indigo-950/25 flex items-start gap-3.5">
                     <div className="w-7 h-7 rounded-xl bg-indigo-900/60 border border-indigo-700/60 text-indigo-300 font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
                       <BookOpen className="w-4 h-4" />
@@ -155,20 +139,6 @@ export function StrengthsWeaknessesCard({
                       Why Interviewers Care
                     </span>
                     <p className="text-slate-300 leading-relaxed font-medium">{item.whyItMatters}</p>
-                  </div>
-                </div>
-
-                <div className="p-5 bg-emerald-950/25 flex items-start gap-3.5">
-                  <div className="w-7 h-7 rounded-xl bg-emerald-900/60 border border-emerald-700/60 text-emerald-300 font-black text-xs flex items-center justify-center shrink-0 mt-0.5">
-                    <CheckCircle2 className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="font-extrabold text-emerald-300 uppercase tracking-wider text-[11px] block mb-1.5">
-                      Better Example Response
-                    </span>
-                    <div className="p-4 rounded-2xl bg-[#090d16] border border-emerald-500/30 text-emerald-200 font-mono text-xs leading-relaxed shadow-inner">
-                      {item.betterExample}
-                    </div>
                   </div>
                 </div>
 
