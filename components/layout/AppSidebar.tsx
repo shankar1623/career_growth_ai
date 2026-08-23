@@ -9,6 +9,7 @@ import {
   Video,
   MessageSquareCheck,
   Compass,
+  History,
   User,
   Sparkles,
   X,
@@ -23,6 +24,7 @@ const NAV_ITEMS = [
   { name: "Mock Interview", href: "/mock-interview", icon: Video, badge: "LIVE" },
   { name: "Feedback", href: "/feedback", icon: MessageSquareCheck, badge: null },
   { name: "Learning Roadmap", href: "/roadmap", icon: Compass, badge: "4-Wk" },
+  { name: "History", href: "/history", icon: History, badge: "ALL" },
   { name: "Profile", href: "/profile", icon: User, badge: null },
 ];
 
