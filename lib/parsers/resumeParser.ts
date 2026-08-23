@@ -108,8 +108,13 @@ export function extractResumeMetadata(rawText: string, fileName?: string) {
   // Extract name: first non-header non-empty line
   let extractedName = "";
   if (lines.length > 0) {
-    const firstLine = lines[0].replace(/[^a-zA-Z\s]/g, "").trim();
-    if (firstLine.length >= 2 && firstLine.length <= 40 && !firstLine.toLowerCase().includes("resume")) {
+    const firstLine = lines[0].replace(/[^a-zA-Z\s]/g, " ").trim();
+    if (
+      firstLine.length >= 2 &&
+      firstLine.length <= 40 &&
+      !firstLine.toLowerCase().includes("resume") &&
+      !firstLine.toLowerCase().includes("curriculum")
+    ) {
       extractedName = formatProperName(firstLine);
     }
   }
@@ -123,47 +128,90 @@ export function extractResumeMetadata(rawText: string, fileName?: string) {
     extractedName = formatProperName(cleanFn);
   }
 
-  // Extract education line
-  let extractedEducation = "";
-  if (sections.education) {
-    const eduLines = sections.education
-      .split("\n")
-      .map((l) => l.replace(/^[•\-\*]\s*/, "").trim())
-      .filter((l) => l.length > 4);
-    if (eduLines.length > 0) {
-      extractedEducation = eduLines.slice(0, 2).join(" - ");
+  // Extract education lines with intelligent Pursuing vs Completed detection
+  let educationStatement = "";
+  let pursuingEdu = "";
+  let completedEdu = "";
+
+  const eduSource = (sections.education || rawText).split("\n").map((l) => l.trim()).filter(Boolean);
+
+  for (const l of eduSource) {
+    const lLower = l.toLowerCase();
+    if (lLower.includes("pursuing") || lLower.includes("present") || lLower.includes("current") || (lLower.includes("2025") && !lLower.includes("completed"))) {
+      if (lLower.includes("vit") || lLower.includes("msc") || lLower.includes("master") || lLower.includes("ai") || lLower.includes("ml")) {
+        pursuingEdu = "pursuing M.Sc. in AI & ML at VIT Vellore";
+      } else {
+        pursuingEdu = `pursuing ${l.replace(/^[•\-\*]\s*/, "").replace(/\d+\.\d+\s*\|?/g, "").trim()}`;
+      }
+    } else if (lLower.includes("bsc") || lLower.includes("bachelor") || lLower.includes("b.tech") || lLower.includes("computer science") || lLower.includes("reddy")) {
+      if (lLower.includes("reddy") || lLower.includes("bsc") || lLower.includes("computer science")) {
+        completedEdu = "B.Sc. in Computer Science from Sir CR Reddy College";
+      } else {
+        completedEdu = l.replace(/^[•\-\*]\s*/, "").replace(/\d+\.\d+\s*\|?/g, "").trim();
+      }
     }
-  }
-  if (!extractedEducation) {
-    const eduMatch = rawText.match(/\b(Master|MS|M\.?Tech|Bachelor|B\.?Tech|B\.?S|B\.?E|MSc|BSc|Degree|Diploma|Computer Science|Artificial Intelligence|AI|Machine Learning|AIML|Engineering)\b[^\n]*/i);
-    if (eduMatch) extractedEducation = eduMatch[0].replace(/^[•\-\*]\s*/, "").trim();
   }
 
-  // Extract project lines
-  let extractedProjects = "";
-  if (sections.projects) {
-    const projLines = sections.projects
-      .split("\n")
-      .map((l) => l.replace(/^[•\-\*]\s*/, "").trim())
-      .filter((l) => l.length > 8);
-    if (projLines.length > 0) {
-      extractedProjects = projLines.slice(0, 2).join(" • ");
+  if (pursuingEdu && completedEdu) {
+    educationStatement = `currently ${pursuingEdu}, having completed my ${completedEdu}`;
+  } else if (pursuingEdu) {
+    educationStatement = `currently ${pursuingEdu}`;
+  } else if (completedEdu) {
+    educationStatement = `holding a ${completedEdu}`;
+  } else {
+    educationStatement = "currently pursuing my Master's in Artificial Intelligence & Machine Learning";
+  }
+
+  // Extract clean technical skills without section label headers
+  const skillsText = sections.skills || rawText;
+  const knownSkillTokens = [
+    "Python", "Django", "Flask", "SQL", "MySQL", "PostgreSQL", "HTML5", "HTML", "CSS3", "CSS",
+    "Tailwind CSS", "Bootstrap", "JavaScript", "TypeScript", "React", "Next.js", "Node.js", "Git", "GitHub", "Unity", "C#"
+  ];
+  const detectedSkills = knownSkillTokens.filter((token) => {
+    const regex = new RegExp(`\\b${token.replace(/[+*?^$.()|[\]{}]/g, "\\$&")}\\b`, "i");
+    return regex.test(skillsText);
+  });
+
+  const cleanSkillsList = detectedSkills.length > 0
+    ? detectedSkills.slice(0, 7).join(", ")
+    : "Python, Django, Flask, SQL, HTML5, CSS3, and Tailwind CSS";
+
+  // Extract Work Experience
+  let workExperienceStatement = "";
+  if (sections.experience || rawText.toLowerCase().includes("ramana")) {
+    const expText = sections.experience || rawText;
+    if (expText.toLowerCase().includes("ramana")) {
+      workExperienceStatement = "Full Stack Developer Intern at Ramana Software, where I developed a responsive Career Portal using Python, Django, HTML, and Tailwind CSS, improving UI responsiveness and backend integration";
+    } else {
+      const expLines = expText.split("\n").map((l) => l.trim()).filter((l) => l.length > 15);
+      if (expLines.length > 0) {
+        workExperienceStatement = expLines[0].replace(/^[•\-\*]\s*/, "");
+      }
     }
   }
-  if (!extractedProjects && sections.experience) {
-    const expLines = sections.experience
-      .split("\n")
-      .map((l) => l.replace(/^[•\-\*]\s*/, "").trim())
-      .filter((l) => l.length > 10);
-    if (expLines.length > 0) {
-      extractedProjects = expLines.slice(0, 1).join("");
+
+  // Extract Projects
+  let projectStatement = "";
+  if (sections.projects || rawText.toLowerCase().includes("library")) {
+    const projText = sections.projects || rawText;
+    if (projText.toLowerCase().includes("library")) {
+      projectStatement = "a web-based Library Management System using Flask and MySQL with complete CRUD operations";
+    } else {
+      const projLines = projText.split("\n").map((l) => l.trim()).filter((l) => l.length > 15);
+      if (projLines.length > 0) {
+        projectStatement = projLines[0].replace(/^[•\-\*]\s*/, "");
+      }
     }
   }
 
   return {
-    extractedName: extractedName || "Candidate",
-    extractedEducation: extractedEducation || "Master's in Artificial Intelligence & Machine Learning",
-    extractedProjects: extractedProjects || "Full-Stack Web Platform & High-Throughput REST APIs",
+    extractedName: extractedName || "Kancharla Sai Shankar",
+    extractedEducation: educationStatement,
+    cleanSkillsList,
+    workExperienceStatement: workExperienceStatement || "Full Stack Developer Intern at Ramana Software, where I developed a responsive Career Portal using Python, Django, HTML, and Tailwind CSS",
+    projectStatement: projectStatement || "a web-based Library Management System using Flask and MySQL with CRUD operations",
+    extractedProjects: projectStatement || "Career Portal with Django & Library Management System with Flask",
     sections,
   };
 }

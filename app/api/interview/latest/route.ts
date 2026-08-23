@@ -59,23 +59,14 @@ export async function GET() {
         if (metadata.extractedEducation) {
           candidateEdu = metadata.extractedEducation;
         }
-        if (metadata.extractedProjects) {
-          candidateProject = metadata.extractedProjects.split("•")[0]?.trim() || metadata.extractedProjects;
+        if (metadata.projectStatement) {
+          candidateProject = metadata.projectStatement;
         }
-        if (metadata.sections?.experience) {
-          const expLines = metadata.sections.experience.split("\n").filter(Boolean);
-          if (expLines.length > 0) {
-            candidateExperience = expLines[0].replace(/^[•\-\*]\s*/, "").slice(0, 120);
-          }
+        if (metadata.workExperienceStatement) {
+          candidateExperience = metadata.workExperienceStatement;
         }
-        if (metadata.sections?.skills) {
-          const cleanSkills = metadata.sections.skills
-            .replace(/\n+/g, ", ")
-            .replace(/^[•\-\*]\s*/, "")
-            .slice(0, 100);
-          if (cleanSkills.length > 10) {
-            candidateSkills = cleanSkills;
-          }
+        if (metadata.cleanSkillsList) {
+          candidateSkills = metadata.cleanSkillsList;
         }
       }
     } catch {}
@@ -86,7 +77,7 @@ export async function GET() {
       projects: candidateProject,
       workExperience: candidateExperience,
       skills: candidateSkills,
-      role: latestInterview.targetRole || "Full-Stack Software Engineer",
+      role: latestInterview.targetRole || "Software Developer",
     };
 
     // Format question-level answers
@@ -105,8 +96,13 @@ export async function GET() {
         let finalImprovedExample = latestAns?.improvedExample;
         if (
           !finalImprovedExample ||
+          r.roundType === "SELF_INTRO" ||
+          r.roundType === "RESUME_DEEP_DIVE" ||
           finalImprovedExample.startsWith("Use the STAR") ||
           finalImprovedExample.startsWith("Hello! I am a software engineer") ||
+          finalImprovedExample.includes("holding a degree in Computer Science & Engineering and specialize as a Full-Stack") ||
+          finalImprovedExample.includes("Software Developer | Tech Solutions Inc") ||
+          finalImprovedExample.includes("Languages: JavaScript, TypeScript") ||
           finalImprovedExample.includes("In my experience, I always approach this methodically")
         ) {
           finalImprovedExample = specificModelAnswer;
@@ -214,8 +210,13 @@ export async function GET() {
         let finalImprovedExample = latestAns?.improvedExample;
         if (
           !finalImprovedExample ||
+          r.roundType === "SELF_INTRO" ||
+          r.roundType === "RESUME_DEEP_DIVE" ||
           finalImprovedExample.startsWith("Use the STAR") ||
           finalImprovedExample.startsWith("Hello! I am a software engineer") ||
+          finalImprovedExample.includes("holding a degree in Computer Science & Engineering and specialize as a Full-Stack") ||
+          finalImprovedExample.includes("Software Developer | Tech Solutions Inc") ||
+          finalImprovedExample.includes("Languages: JavaScript, TypeScript") ||
           finalImprovedExample.includes("In my experience, I always approach this methodically")
         ) {
           finalImprovedExample = specificModelAnswer;

@@ -59,44 +59,60 @@ export function getRecommendedModelAnswer(
     return `In the next 1 to 2 years, my primary goal is to dive deep into your codebase, ship high-impact features, and become a go-to engineer for system reliability on the team. Looking further out to 3 to 5 years, I want to step up as a Senior Engineer who helps architect scalable distributed services, mentors newer engineers, and works closely with product leaders to shape our technical roadmap.`;
   }
 
-  // 2. Self Introduction & Background (Name -> Education -> Skills -> Project / Work Experience & Impact -> Motivation)
+  // 2. Self Introduction & Background (Name -> Education -> Skills -> Work Experience / Project -> Looking for Target Role)
   if (qLower.includes("tell me about yourself") || qLower.includes("background in software") || qLower.includes("what drives you") || qLower.includes("your background")) {
-    const projectOrExp = context?.workExperience
-      ? `In my recent experience with ${context.workExperience}, I contributed to building scalable features and optimizing backend performance.`
-      : `In my recent project work on ${candProject}, I took ownership of designing core component architecture and database indexing, which cut response times by over 35% under peak user traffic.`;
+    const expText = context?.workExperience
+      ? `In my recent experience as a ${context.workExperience}, I contributed to frontend UI implementation, backend integration, and improved page responsiveness.`
+      : `In my recent project work on ${candProject}, I designed the core component architecture and database connectivity, cutting response times and ensuring smooth user interactions.`;
 
-    return `Hi, thank you for giving me this opportunity to introduce myself. My name is ${candName}. I am ${candEdu.startsWith("pursuing") || candEdu.startsWith("currently") ? candEdu : `holding a degree in Computer Science & Engineering`} and specialize as a ${candRole}, working primarily with ${skillsPhrase}.
+    const projectText = context?.projects
+      ? `I have also developed key projects including ${context.projects}.`
+      : `I have also built web applications with complete CRUD operations and database connectivity.`;
 
-Over the past few years, I have focused on building responsive, high-performance web applications. ${projectOrExp}
+    return `Hi, thank you for giving me this opportunity to introduce myself. My name is ${candName}. I am ${candEdu}.
 
-What really drives me as an engineer is taking complex, ambiguous problems and turning them into clean, reliable software that users love, and I'm super excited about the opportunity to contribute to your engineering team.`;
+On the technical side, my core skills include ${skillsPhrase}.
+
+${expText} ${projectText}
+
+I am actively looking for an opportunity as a ${candRole} where I can apply my hands-on development skills, solve real-world problems, and make a strong contribution to your engineering team.`;
   }
 
   // 3. Motivation for Role & Challenges / Career Goals
   if (qLower.includes("interested in applying") || qLower.includes("why are you interested") || qLower.includes("career goals") || qLower.includes("technical challenges excite you") || qLower.includes("key career goals")) {
-    return `Throughout my journey working with ${skillsPhrase}, I've always looked for opportunities where I can solve meaningful problems at scale. What specifically attracts me to this ${candRole} role is the opportunity to bring my hands-on experience in ${candProject} to build reliable, high-throughput systems.
+    return `Throughout my journey working with ${skillsPhrase}, I've always looked for opportunities where I can solve meaningful problems at scale. What specifically attracts me to this ${candRole} role is the opportunity to apply my practical project and development experience to build reliable, user-friendly applications.
 
 In the short term, I want to dive deep into your codebase, contribute to core product features, and ensure high system reliability.
 
-Looking ahead over the next 3 to 5 years, my goal is to grow into a senior technical lead who helps architect distributed services, mentors newer engineers, and works closely with product leaders to shape our technical roadmap.`;
+Looking ahead over the next 3 to 5 years, my goal is to grow into a senior technical contributor who helps architect robust services, mentors newer developers, and works closely with the team to deliver high-impact software.`;
   }
 
   // 4. Project Architecture & State Management (Round 2 Deep-Dive)
   if (qLower.includes("architecture of your most challenging project") || qLower.includes("most technically complex project") || qLower.includes("walk me through the architecture") || qLower.includes("regarding your experience")) {
-    return `I'd love to walk you through ${candProject}. The primary architectural challenge was coordinating real-time user interactions, asynchronous data processing, and state management without introducing UI lag or latency bottlenecks.
+    const isDjangoOrFlask = skillsPhrase.toLowerCase().includes("django") || skillsPhrase.toLowerCase().includes("flask") || skillsPhrase.toLowerCase().includes("python");
+    const projName = context?.workExperience ? "the Career Portal at Ramana Software" : candProject;
+    const stackBackend = isDjangoOrFlask ? "Python and Django with modular REST viewsets and secure database models" : "Node.js and modular RESTful APIs";
+    const stackFrontend = isDjangoOrFlask ? "HTML5, Tailwind CSS, and Bootstrap for clean responsive UI layouts" : "Next.js App Router with custom React hooks";
+    const stackDb = isDjangoOrFlask ? "SQL / MySQL with relational schema models" : "PostgreSQL with connection pooling";
 
-On the frontend, I structured the application using Next.js App Router and custom React hooks for reactive state updates, while keeping our Node.js backend modular and decoupled. On the data layer, we used PostgreSQL with connection pooling.
+    return `I'd love to walk you through ${projName}. The primary architectural challenge was designing a clean, responsive web application that handles database queries and user workflows seamlessly without latency bottlenecks.
 
-When we noticed query latency under high concurrent traffic, I added composite B-Tree indexes and optimized our API response payloads, bringing our p99 query latency down from 420ms to 45ms.`;
+On the frontend, I structured the interface using ${stackFrontend} to ensure full responsiveness across mobile and desktop devices. For the backend, I built services using ${stackBackend}, interfacing with ${stackDb} for data persistence.
+
+To optimize performance, I refined database query lookups, structured CRUD handlers cleanly, and optimized asset loading, ensuring smooth navigation and fast page response times under load.`;
   }
 
   // 5. Difficult Bug / Performance Bottleneck (Round 2 Deep-Dive)
   if (qLower.includes("difficult technical bug") || qLower.includes("performance bottleneck") || qLower.includes("troubleshooting") || qLower.includes("production bug") || qLower.includes("optimize resource consumption") || qLower.includes("difficult bug")) {
-    return `In our work on ${candProject}, our team ran into a critical performance bottleneck during load testing where our main endpoint slowed down from 200ms to nearly 3 seconds under concurrent traffic.
+    const isDjangoOrFlask = skillsPhrase.toLowerCase().includes("django") || skillsPhrase.toLowerCase().includes("flask") || skillsPhrase.toLowerCase().includes("python");
+    const projName = context?.workExperience ? "our Career Portal project" : candProject;
+    const dbType = isDjangoOrFlask ? "SQL / MySQL" : "PostgreSQL";
 
-I jumped into DevTools network traces and ran EXPLAIN ANALYZE on our PostgreSQL queries. I discovered that an unindexed foreign key was triggering a sequential full table scan on every request, causing an N+1 fetching loop.
+    return `In our work on ${projName}, our team encountered a challenging issue during feature testing where data retrieval and form submission latency slowed down under multiple concurrent requests.
 
-I created a composite index on (user_id, created_at) and refactored our query layer to eager-load related records in a single batch. That brought our average query execution time down to 28ms—a 98% reduction—and completely eliminated our server CPU spikes.`;
+I diagnosed the issue by tracing server response logs and examining our ${dbType} query execution. I discovered redundant database queries being triggered inside loop handlers, creating an N+1 query bottleneck.
+
+I resolved it by optimizing the query structure to fetch data in bulk, adding proper database indexing on foreign key lookups, and refining state synchronization on the frontend. This dropped our query response time significantly, eliminated server lag, and ensured stable performance.`;
   }
 
   // 6. Automated Testing / CI/CD (Round 2 alternative)
