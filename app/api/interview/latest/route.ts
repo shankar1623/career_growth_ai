@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getAuthenticatedUser } from "@/lib/auth/userHelper";
 import { getRecommendedModelAnswer } from "@/lib/ai/smartFallbackProvider";
+import { extractResumeMetadata } from "@/lib/parsers/resumeParser";
 import prisma from "@/lib/db/prisma";
 
 export async function GET() {
@@ -38,34 +39,53 @@ export async function GET() {
       return NextResponse.json({ success: true, interview: null });
     }
 
-    // Extract candidate profile context (Name -> Education -> Projects)
+    // Extract candidate profile context (Name -> Education -> Projects -> Skills -> Work Experience)
     let candidateName = user.name || "Sai Shankar";
     let candidateEdu = "pursuing my Master's in Artificial Intelligence & Machine Learning";
     let candidateProject = "Full-Stack Web Platform";
+    let candidateExperience = "";
+    let candidateSkills = "TypeScript, React, Next.js, Node.js, and PostgreSQL";
 
-    if (latestInterview.resumeId) {
-      try {
-        const resume = await prisma.resume.findUnique({
-          where: { id: latestInterview.resumeId },
-        });
-        if (resume) {
-          const rLower = (resume.rawText || "").toLowerCase();
-          if (rLower.includes("sai") || rLower.includes("shankar")) {
-            candidateName = "Sai Shankar";
-          }
-          if (rLower.includes("master") || rLower.includes("ai") || rLower.includes("aml")) {
-            candidateEdu = "pursuing my Master's in Artificial Intelligence & Machine Learning";
-          } else if (rLower.includes("bachelor") || rLower.includes("b.tech") || rLower.includes("computer science")) {
-            candidateEdu = "holding a degree in Computer Science & Engineering";
+    try {
+      const resume = latestInterview.resumeId
+        ? await prisma.resume.findUnique({ where: { id: latestInterview.resumeId } })
+        : await prisma.resume.findFirst({ where: { userId: user.userId }, orderBy: { createdAt: "desc" } });
+
+      if (resume && resume.rawText) {
+        const metadata = extractResumeMetadata(resume.rawText, resume.fileName || undefined);
+        if (metadata.extractedName && metadata.extractedName !== "Candidate") {
+          candidateName = metadata.extractedName;
+        }
+        if (metadata.extractedEducation) {
+          candidateEdu = metadata.extractedEducation;
+        }
+        if (metadata.extractedProjects) {
+          candidateProject = metadata.extractedProjects.split("•")[0]?.trim() || metadata.extractedProjects;
+        }
+        if (metadata.sections?.experience) {
+          const expLines = metadata.sections.experience.split("\n").filter(Boolean);
+          if (expLines.length > 0) {
+            candidateExperience = expLines[0].replace(/^[•\-\*]\s*/, "").slice(0, 120);
           }
         }
-      } catch {}
-    }
+        if (metadata.sections?.skills) {
+          const cleanSkills = metadata.sections.skills
+            .replace(/\n+/g, ", ")
+            .replace(/^[•\-\*]\s*/, "")
+            .slice(0, 100);
+          if (cleanSkills.length > 10) {
+            candidateSkills = cleanSkills;
+          }
+        }
+      }
+    } catch {}
 
     const candidateContext = {
       name: candidateName,
       education: candidateEdu,
       projects: candidateProject,
+      workExperience: candidateExperience,
+      skills: candidateSkills,
       role: latestInterview.targetRole || "Full-Stack Software Engineer",
     };
 

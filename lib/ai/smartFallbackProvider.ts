@@ -34,7 +34,10 @@ export interface CandidateContext {
   name?: string;
   education?: string;
   projects?: string;
+  workExperience?: string;
+  skills?: string;
   role?: string;
+  companyName?: string;
 }
 
 // Generate exact, high-impact, question-specific model answers tailored to each round
@@ -49,30 +52,35 @@ export function getRecommendedModelAnswer(
   const candEdu = context?.education || "currently pursuing my Master's in Artificial Intelligence & Machine Learning";
   const candRole = context?.role || "Full-Stack Software Engineer";
   const candProject = context?.projects || "Full-Stack Web Platform";
+  const skillsPhrase = context?.skills || "TypeScript, React, Next.js, Node.js, and PostgreSQL";
 
   // 1. Five Years / Career Goals
   if (qLower.includes("three to five years") || qLower.includes("5 years") || qLower.includes("where do you see yourself") || qLower.includes("career aspiration")) {
     return `In the next 1 to 2 years, my primary goal is to dive deep into your codebase, ship high-impact features, and become a go-to engineer for system reliability on the team. Looking further out to 3 to 5 years, I want to step up as a Senior Engineer who helps architect scalable distributed services, mentors newer engineers, and works closely with product leaders to shape our technical roadmap.`;
   }
 
-  // 2. Self Introduction & Background (Name -> Education -> Skills -> Project & Impact -> Motivation)
+  // 2. Self Introduction & Background (Name -> Education -> Skills -> Project / Work Experience & Impact -> Motivation)
   if (qLower.includes("tell me about yourself") || qLower.includes("background in software") || qLower.includes("what drives you") || qLower.includes("your background")) {
-    return `Hi, thanks for having me today! My name is ${candName}. I am ${candEdu.startsWith("pursuing") || candEdu.startsWith("currently") ? candEdu : `holding a degree in Computer Science & Engineering`} and specialize as a ${candRole}, working primarily with TypeScript, React, Next.js, Node.js, and PostgreSQL. Over the past few years, I have focused on building responsive, high-performance web applications. In my recent work on ${candProject}, I engineered real-time features and restructured database indexing, which cut query response times by over 35% under peak traffic. What really drives me as an engineer is taking complex, ambiguous problems and turning them into clean, reliable software that users love, and I'm super excited about the opportunity to contribute to your engineering team.`;
+    const projectOrExp = context?.workExperience
+      ? `In my recent experience with ${context.workExperience}, I contributed to building scalable features and optimizing backend performance.`
+      : `In my recent project work on ${candProject}, I took ownership of designing core component architecture and database indexing, which cut response times by over 35% under peak user traffic.`;
+
+    return `Hi, thank you for giving me this opportunity to introduce myself. My name is ${candName}. I am ${candEdu.startsWith("pursuing") || candEdu.startsWith("currently") ? candEdu : `holding a degree in Computer Science & Engineering`} and specialize as a ${candRole}, working primarily with ${skillsPhrase}. Over the past few years, I have focused on building responsive, high-performance web applications. ${projectOrExp} What really drives me as an engineer is taking complex, ambiguous problems and turning them into clean, reliable software that users love, and I'm super excited about the opportunity to contribute to your engineering team.`;
   }
 
-  // 3. Motivation for Role & Challenges
-  if (qLower.includes("interested in applying") || qLower.includes("why are you interested") || qLower.includes("technical challenges excite you")) {
-    return `I've been following your team's work, and what really stands out to me is the scale you're operating at and your focus on engineering craftsmanship. I love tackling challenges around frontend-to-backend latency, data synchronization, and making sure systems stay resilient under high traffic. I'm excited about the chance to bring my hands-on problem-solving mindset and proactive energy to help you hit your upcoming product milestones.`;
+  // 3. Motivation for Role & Challenges / Career Goals
+  if (qLower.includes("interested in applying") || qLower.includes("why are you interested") || qLower.includes("career goals") || qLower.includes("technical challenges excite you") || qLower.includes("key career goals")) {
+    return `Throughout my journey working with ${skillsPhrase}, I've always looked for opportunities where I can solve meaningful problems at scale. What specifically attracts me to this ${candRole} role is the opportunity to bring my hands-on experience in ${candProject} to build reliable, high-throughput systems. In the short term, I want to dive deep into your codebase, contribute to core product features, and ensure high system reliability. Looking ahead over the next 3 to 5 years, my goal is to grow into a senior technical lead who helps architect distributed services, mentors newer engineers, and works closely with product leaders to shape our technical roadmap.`;
   }
 
-  // 4. Project Architecture & State Management
-  if (qLower.includes("architecture of your most challenging project") || qLower.includes("most technically complex project")) {
-    return `On one of my favorite recent projects—a full-stack web application—the most interesting challenge was managing real-time media streams and speech transcription without causing any browser lag. I structured the frontend with Next.js App Router and custom React hooks for reactive state updates, while keeping our Node.js backend modular and decoupled. On the data layer, we used PostgreSQL with connection pooling. When we noticed latency spikes under heavy concurrent usage, I added composite B-Tree indexes that brought our p99 query latency down from 420ms to 45ms.`;
+  // 4. Project Architecture & State Management (Round 2 Deep-Dive)
+  if (qLower.includes("architecture of your most challenging project") || qLower.includes("most technically complex project") || qLower.includes("walk me through the architecture") || qLower.includes("regarding your experience")) {
+    return `I'd love to walk you through ${candProject}. The primary architectural challenge was coordinating real-time user interactions, asynchronous data processing, and state management without introducing UI lag or latency bottlenecks. I structured the frontend with Next.js App Router and custom React hooks for reactive state updates, while keeping our Node.js backend modular and decoupled. On the data layer, we used PostgreSQL with connection pooling. When we noticed query latency under high concurrent traffic, I added composite B-Tree indexes and optimized our API response payloads, bringing our p99 query latency down from 420ms to 45ms.`;
   }
 
-  // 5. Difficult Bug / Performance Bottleneck
-  if (qLower.includes("difficult technical bug") || qLower.includes("performance bottleneck") || qLower.includes("troubleshooting")) {
-    return `During load testing for a new feature, our main API endpoint suddenly slowed down from 200ms to nearly 3 seconds under concurrent traffic. I checked the Chrome DevTools network tab and ran EXPLAIN ANALYZE on our SQL queries in PostgreSQL. I found that an unindexed foreign key was causing a full sequential table scan on every single request. I added a composite index on (user_id, created_at) and refactored our ORM query to eliminate an N+1 fetching loop. That brought the average query execution time down to 28ms and completely resolved the CPU spike.`;
+  // 5. Difficult Bug / Performance Bottleneck (Round 2 Deep-Dive)
+  if (qLower.includes("difficult technical bug") || qLower.includes("performance bottleneck") || qLower.includes("troubleshooting") || qLower.includes("production bug") || qLower.includes("optimize resource consumption") || qLower.includes("difficult bug")) {
+    return `In our work on ${candProject}, our team ran into a critical performance bottleneck during load testing where our main endpoint slowed down from 200ms to nearly 3 seconds under concurrent traffic. I jumped into DevTools network traces and ran EXPLAIN ANALYZE on our PostgreSQL queries. I discovered that an unindexed foreign key was triggering a sequential full table scan on every request, causing an N+1 fetching loop. I created a composite index on (user_id, created_at) and refactored our query layer to eager-load related records in a single batch. That brought our average query execution time down to 28ms—a 98% reduction—and completely eliminated our server CPU spikes.`;
   }
 
   // 6. Asynchronous JavaScript & Event Loop
