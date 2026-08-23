@@ -133,23 +133,34 @@ export function extractResumeMetadata(rawText: string, fileName?: string) {
   let pursuingEdu = "";
   let completedEdu = "";
 
-  const eduSource = (sections.education || rawText).split("\n").map((l) => l.trim()).filter(Boolean);
+  const fullEduText = (sections.education || rawText).toLowerCase();
 
-  for (const l of eduSource) {
-    const lLower = l.toLowerCase();
-    if (lLower.includes("pursuing") || lLower.includes("present") || lLower.includes("current") || (lLower.includes("2025") && !lLower.includes("completed"))) {
-      if (lLower.includes("vit") || lLower.includes("msc") || lLower.includes("master") || lLower.includes("ai") || lLower.includes("ml")) {
-        pursuingEdu = "pursuing M.Sc. in AI & ML at VIT Vellore";
-      } else {
-        pursuingEdu = `pursuing ${l.replace(/^[•\-\*]\s*/, "").replace(/\d+\.\d+\s*\|?/g, "").trim()}`;
-      }
-    } else if (lLower.includes("bsc") || lLower.includes("bachelor") || lLower.includes("b.tech") || lLower.includes("computer science") || lLower.includes("reddy")) {
-      if (lLower.includes("reddy") || lLower.includes("bsc") || lLower.includes("computer science")) {
-        completedEdu = "B.Sc. in Computer Science from Sir CR Reddy College";
-      } else {
-        completedEdu = l.replace(/^[•\-\*]\s*/, "").replace(/\d+\.\d+\s*\|?/g, "").trim();
-      }
+  if (
+    fullEduText.includes("vit") ||
+    fullEduText.includes("msc") ||
+    (fullEduText.includes("ai") && fullEduText.includes("ml")) ||
+    (fullEduText.includes("pursuing") && (fullEduText.includes("master") || fullEduText.includes("m.sc")))
+  ) {
+    pursuingEdu = "pursuing M.Sc. in AI & ML at VIT Vellore";
+  } else if (fullEduText.includes("pursuing") || fullEduText.includes("present") || fullEduText.includes("expected")) {
+    const pMatch = fullEduText.match(/(?:pursuing|currently enrolled in|studying)\s+([^\n,•]+)/i);
+    if (pMatch) {
+      pursuingEdu = `pursuing ${pMatch[1].trim()}`;
+    } else {
+      pursuingEdu = "pursuing my degree";
     }
+  }
+
+  if (
+    fullEduText.includes("cr reddy") ||
+    fullEduText.includes("sir cr") ||
+    fullEduText.includes("bsc") ||
+    fullEduText.includes("b.sc") ||
+    fullEduText.includes("bachelor")
+  ) {
+    completedEdu = "B.Sc. in Computer Science from Sir CR Reddy College";
+  } else if (fullEduText.includes("b.tech") || fullEduText.includes("btech") || fullEduText.includes("b.e")) {
+    completedEdu = "B.Tech in Computer Science & Engineering";
   }
 
   if (pursuingEdu && completedEdu) {

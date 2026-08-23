@@ -40,11 +40,11 @@ export async function GET() {
     }
 
     // Extract candidate profile context (Name -> Education -> Projects -> Skills -> Work Experience)
-    let candidateName = user.name || "Sai Shankar";
-    let candidateEdu = "pursuing my Master's in Artificial Intelligence & Machine Learning";
-    let candidateProject = "Full-Stack Web Platform";
-    let candidateExperience = "";
-    let candidateSkills = "TypeScript, React, Next.js, Node.js, and PostgreSQL";
+    let candidateName = "Kancharla Sai Shankar";
+    let candidateEdu = "currently pursuing my M.Sc. in AI & ML at VIT Vellore, having completed my B.Sc. in Computer Science from Sir CR Reddy College";
+    let candidateProject = "a web-based Library Management System using Flask and MySQL with complete CRUD operations";
+    let candidateExperience = "Full Stack Developer Intern at Ramana Software, where I developed a responsive Career Portal using Python, Django, HTML, and Tailwind CSS";
+    let candidateSkills = "Python, Django, Flask, SQL, HTML, CSS, Tailwind CSS, and Bootstrap";
 
     try {
       const resume = latestInterview.resumeId
