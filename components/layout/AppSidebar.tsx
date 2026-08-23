@@ -11,6 +11,7 @@ import {
   Compass,
   User,
   Sparkles,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/common/BrandLogo";
@@ -25,18 +26,40 @@ const NAV_ITEMS = [
   { name: "Profile", href: "/profile", icon: User, badge: null },
 ];
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  isMobile?: boolean;
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export function AppSidebar({ isMobile = false, isOpen = false, onClose }: AppSidebarProps) {
   const pathname = usePathname();
 
-  return (
-    <aside className="w-64 h-full bg-white/90 dark:bg-slate-900/95 backdrop-blur-xl border-r border-stone-200/80 dark:border-slate-800 flex flex-col shrink-0 overflow-y-auto shadow-xs z-30 transition-colors duration-200">
-      {/* Brand Logo Header */}
-      <div className="h-16 flex items-center px-5 border-b border-stone-100/90 dark:border-slate-800/80 shrink-0 sticky top-0 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md z-10 transition-colors duration-200">
+  const handleLinkClick = () => {
+    if (isMobile && onClose) {
+      onClose();
+    }
+  };
+
+  const navContent = (
+    <div className="h-full flex flex-col justify-between">
+      {/* Brand Header */}
+      <div className="h-16 flex items-center justify-between px-5 border-b border-stone-100/90 dark:border-slate-800/80 shrink-0 sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-10 transition-colors duration-200">
         <BrandLogo href="/dashboard" />
+        {isMobile && onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close navigation menu"
+            className="p-1.5 rounded-xl hover:bg-stone-100 dark:hover:bg-slate-800 text-stone-500 dark:text-slate-400 hover:text-stone-900 dark:hover:text-white transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        )}
       </div>
 
       {/* Navigation Links */}
-      <nav className="flex-1 px-3.5 py-4 space-y-1.5">
+      <nav className="flex-1 px-3.5 py-4 space-y-1.5 overflow-y-auto">
         <div className="px-3 pb-2 text-[10px] font-black tracking-wider text-stone-400 dark:text-slate-500 uppercase flex items-center justify-between">
           <span>Platform Modules</span>
           <Sparkles className="w-3 h-3 text-indigo-500" />
@@ -48,6 +71,7 @@ export function AppSidebar() {
             <Link
               key={item.name}
               href={item.href}
+              onClick={handleLinkClick}
               className={cn(
                 "flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-xs font-bold transition-all duration-200 relative group",
                 isActive
@@ -81,6 +105,40 @@ export function AppSidebar() {
           );
         })}
       </nav>
+
+      {/* Footer Info / Version */}
+      <div className="p-4 border-t border-stone-100 dark:border-slate-800 text-[10px] text-stone-400 dark:text-slate-500 text-center font-medium">
+        <span>CareerGrowth AI Studio v2.4</span>
+      </div>
+    </div>
+  );
+
+  // If mobile drawer mode
+  if (isMobile) {
+    if (!isOpen) return null;
+    return (
+      <div className="fixed inset-0 z-50 lg:hidden">
+        {/* Backdrop Overlay */}
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-300 animate-in fade-in"
+          onClick={onClose}
+          aria-hidden="true"
+        />
+
+        {/* Drawer Panel */}
+        <aside
+          className="fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-white dark:bg-slate-900 border-r border-stone-200 dark:border-slate-800 z-50 shadow-2xl flex flex-col transition-transform duration-300 animate-in slide-in-from-left"
+        >
+          {navContent}
+        </aside>
+      </div>
+    );
+  }
+
+  // Desktop Static Sidebar
+  return (
+    <aside className="w-64 h-full bg-white/90 dark:bg-slate-900/95 backdrop-blur-xl border-r border-stone-200/80 dark:border-slate-800 flex flex-col shrink-0 overflow-y-auto shadow-xs z-30 transition-colors duration-200">
+      {navContent}
     </aside>
   );
 }

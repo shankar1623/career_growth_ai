@@ -32,10 +32,10 @@ export function RecentActivityList({ activities }: RecentActivityListProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xs transition-colors">
-      <div className="flex items-center justify-between mb-4">
+    <div className="bg-white dark:bg-slate-900 p-4 sm:p-6 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-xs transition-colors w-full overflow-hidden">
+      <div className="flex items-center justify-between mb-4 gap-2">
         <h3 className="text-sm font-black text-slate-900 dark:text-white">Recent Career Milestones</h3>
-        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Real-time Activity</span>
+        <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 shrink-0">Real-time Activity</span>
       </div>
 
       <div className="space-y-3">
@@ -43,27 +43,27 @@ export function RecentActivityList({ activities }: RecentActivityListProps) {
           <Link
             key={act.id}
             href={act.link}
-            className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 hover:bg-slate-100/70 dark:hover:bg-slate-800/80 hover:border-slate-200 dark:hover:border-slate-700 transition-all group"
+            className="flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 hover:bg-slate-100/70 dark:hover:bg-slate-800/80 hover:border-slate-200 dark:hover:border-slate-700 transition-all group gap-3"
           >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-2xs">
+            <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+              <div className="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shadow-2xs shrink-0">
                 {getIcon(act.type)}
               </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+              <div className="min-w-0 flex-1">
+                <h4 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate">
                   {act.title}
                 </h4>
-                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">{act.date}</span>
+                <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium block">{act.date}</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               {act.score !== undefined && (
                 <span className="text-xs font-bold px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
                   {formatScore(act.score)}%
                 </span>
               )}
-              <ArrowRight className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all" />
+              <ArrowRight className="w-4 h-4 text-slate-400 dark:text-slate-500 group-hover:text-slate-700 dark:group-hover:text-slate-200 group-hover:translate-x-0.5 transition-all shrink-0" />
             </div>
           </Link>
         ))}
