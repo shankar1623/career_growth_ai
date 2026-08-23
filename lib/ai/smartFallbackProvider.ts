@@ -62,22 +62,42 @@ export function getRecommendedModelAnswer(
 
   // 2. Self Introduction & Background (Name -> Education -> Skills -> Work Experience / Project -> Looking for Target Role)
   if (qLower.includes("tell me about yourself") || qLower.includes("background in software") || qLower.includes("what drives you") || qLower.includes("your background")) {
-    const expText = context?.workExperience
-      ? `In my recent experience as a ${context.workExperience}, I contributed to frontend UI implementation, backend integration, and improved page responsiveness.`
-      : `In my recent project work on ${candProject}, I designed the core component architecture and database connectivity, cutting response times and ensuring smooth user interactions.`;
+    let eduSentence = "";
+    if (candEdu.startsWith("pursuing") || candEdu.startsWith("currently")) {
+      eduSentence = `I am ${candEdu}.`;
+    } else if (candEdu.startsWith("holding") || candEdu.startsWith("having")) {
+      eduSentence = `I hold ${candEdu.replace(/^holding\s+/, "")}.`;
+    } else if (candEdu.startsWith("a background")) {
+      eduSentence = `I have ${candEdu}.`;
+    } else {
+      eduSentence = `I have a background in ${candEdu}.`;
+    }
 
-    const projectText = context?.projects
+    let expText = "";
+    if (context?.workExperience) {
+      const we = context.workExperience.trim();
+      if (we.toLowerCase().startsWith("full stack") || we.toLowerCase().startsWith("software") || we.toLowerCase().startsWith("frontend") || we.toLowerCase().startsWith("backend") || we.toLowerCase().startsWith("intern")) {
+        expText = `In my recent experience as a ${we}, I contributed to feature implementation, backend integration, and performance optimization.`;
+      } else if (we.toLowerCase().startsWith("building") || we.toLowerCase().startsWith("developing") || we.toLowerCase().startsWith("working")) {
+        expText = `In my recent work ${we}, I contributed to feature implementation, backend integration, and performance optimization.`;
+      } else {
+        expText = `In my recent experience in ${we}, I contributed to feature implementation, backend integration, and performance optimization.`;
+      }
+    } else {
+      expText = `In my recent project work on ${candProject}, I designed the core component architecture and database connectivity, cutting response times and ensuring smooth user interactions.`;
+    }
+
+    const projectText = context?.projects && context.projects !== candProject
       ? `I have also developed key projects including ${context.projects}.`
-      : `I have also built web applications with complete CRUD operations and database connectivity.`;
+      : "";
 
-    return `Hi, thank you for giving me this opportunity to introduce myself. My name is ${candName}. I am ${candEdu}.
+    return `Hi, thank you for giving me this opportunity to introduce myself. My name is ${candName}. ${eduSentence}
 
 On the technical side, my core skills include ${skillsPhrase}.
 
-${expText} ${projectText}
-
-I am actively looking for an opportunity as a ${candRole} where I can apply my hands-on development skills, solve real-world problems, and make a strong contribution to your engineering team.`;
+${expText} ${projectText ? `${projectText}\n\n` : ""}I am actively looking for an opportunity as a ${candRole} where I can apply my hands-on development skills, solve real-world problems, and make a strong contribution to your engineering team.`;
   }
+
 
   // 3. Motivation for Role & Challenges / Career Goals
   if (qLower.includes("interested in applying") || qLower.includes("why are you interested") || qLower.includes("career goals") || qLower.includes("technical challenges excite you") || qLower.includes("key career goals")) {
