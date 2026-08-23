@@ -38,6 +38,37 @@ export async function GET() {
       return NextResponse.json({ success: true, interview: null });
     }
 
+    // Extract candidate profile context (Name -> Education -> Projects)
+    let candidateName = user.name || "Sai Shankar";
+    let candidateEdu = "pursuing my Master's in Artificial Intelligence & Machine Learning";
+    let candidateProject = "Full-Stack Web Platform";
+
+    if (latestInterview.resumeId) {
+      try {
+        const resume = await prisma.resume.findUnique({
+          where: { id: latestInterview.resumeId },
+        });
+        if (resume) {
+          const rLower = (resume.rawText || "").toLowerCase();
+          if (rLower.includes("sai") || rLower.includes("shankar")) {
+            candidateName = "Sai Shankar";
+          }
+          if (rLower.includes("master") || rLower.includes("ai") || rLower.includes("aml")) {
+            candidateEdu = "pursuing my Master's in Artificial Intelligence & Machine Learning";
+          } else if (rLower.includes("bachelor") || rLower.includes("b.tech") || rLower.includes("computer science")) {
+            candidateEdu = "holding a degree in Computer Science & Engineering";
+          }
+        }
+      } catch {}
+    }
+
+    const candidateContext = {
+      name: candidateName,
+      education: candidateEdu,
+      projects: candidateProject,
+      role: latestInterview.targetRole || "Full-Stack Software Engineer",
+    };
+
     // Format question-level answers
     const answers = latestInterview.rounds.flatMap((r) =>
       r.questions.map((q) => {
@@ -49,12 +80,13 @@ export async function GET() {
           if (latestAns?.weaknesses) weaknesses = JSON.parse(latestAns.weaknesses);
         } catch {}
 
-        const specificModelAnswer = getRecommendedModelAnswer(q.questionText, r.roundType);
+        const specificModelAnswer = getRecommendedModelAnswer(q.questionText, r.roundType, candidateContext);
 
         let finalImprovedExample = latestAns?.improvedExample;
         if (
           !finalImprovedExample ||
           finalImprovedExample.startsWith("Use the STAR") ||
+          finalImprovedExample.startsWith("Hello! I am a software engineer") ||
           finalImprovedExample.includes("In my experience, I always approach this methodically")
         ) {
           finalImprovedExample = specificModelAnswer;
@@ -157,12 +189,13 @@ export async function GET() {
           if (latestAns?.weaknesses) weaknesses = JSON.parse(latestAns.weaknesses);
         } catch {}
 
-        const specificModelAnswer = getRecommendedModelAnswer(q.questionText, r.roundType);
+        const specificModelAnswer = getRecommendedModelAnswer(q.questionText, r.roundType, candidateContext);
 
         let finalImprovedExample = latestAns?.improvedExample;
         if (
           !finalImprovedExample ||
           finalImprovedExample.startsWith("Use the STAR") ||
+          finalImprovedExample.startsWith("Hello! I am a software engineer") ||
           finalImprovedExample.includes("In my experience, I always approach this methodically")
         ) {
           finalImprovedExample = specificModelAnswer;

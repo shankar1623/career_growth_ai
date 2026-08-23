@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUser } from "@/lib/auth/userHelper";
 import { evaluateSpokenAnswer } from "@/lib/ai/aiProvider";
+import { getRecommendedModelAnswer } from "@/lib/ai/smartFallbackProvider";
 import prisma from "@/lib/db/prisma";
 
 export async function POST(req: NextRequest) {
@@ -39,7 +40,10 @@ export async function POST(req: NextRequest) {
         feedback: "Question was skipped without an answer. Review the recommended model answer below to practice this topic.",
         strengths: [],
         weaknesses: ["No response was provided for this question."],
-        improvedExample: `In my recent project, we encountered a critical requirement change right before sprint release. I adapted our data model and API endpoints without delaying the release by prioritizing core deliverables, automating regression tests, and communicating transparently with the team. As a result, we shipped on time with zero production defects.`,
+        improvedExample: getRecommendedModelAnswer(question.questionText, roundType, {
+          name: user.name || "Sai Shankar",
+          role: question.round.interview.targetRole || "Software Engineer",
+        }),
         starAnalysis: {
           situation: "Set context clearly at the start of your answer.",
           task: "Define the specific challenge or technical goal you owned.",

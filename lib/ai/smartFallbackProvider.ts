@@ -30,18 +30,34 @@ function cleanSectionText(text: string, fallback: string): string {
   return trimmed;
 }
 
+export interface CandidateContext {
+  name?: string;
+  education?: string;
+  projects?: string;
+  role?: string;
+}
+
 // Generate exact, high-impact, question-specific model answers tailored to each round
-export function getRecommendedModelAnswer(questionText: string, roundType: string = "SELF_INTRO"): string {
+export function getRecommendedModelAnswer(
+  questionText: string,
+  roundType: string = "SELF_INTRO",
+  context?: CandidateContext
+): string {
   const qLower = (questionText || "").toLowerCase();
+
+  const candName = context?.name || "Sai Shankar";
+  const candEdu = context?.education || "currently pursuing my Master's in Artificial Intelligence & Machine Learning";
+  const candRole = context?.role || "Full-Stack Software Engineer";
+  const candProject = context?.projects || "Full-Stack Web Platform";
 
   // 1. Five Years / Career Goals
   if (qLower.includes("three to five years") || qLower.includes("5 years") || qLower.includes("where do you see yourself") || qLower.includes("career aspiration")) {
     return `In the next 1 to 2 years, my primary goal is to dive deep into your codebase, ship high-impact features, and become a go-to engineer for system reliability on the team. Looking further out to 3 to 5 years, I want to step up as a Senior Engineer who helps architect scalable distributed services, mentors newer engineers, and works closely with product leaders to shape our technical roadmap.`;
   }
 
-  // 2. Self Introduction & Background
-  if (qLower.includes("tell me about yourself") || qLower.includes("background in software") || qLower.includes("what drives you")) {
-    return `Hi, thanks for having me today! I'm a software engineer with a strong background in TypeScript, React, Next.js, and Node.js. Over the past few years, I've focused on building responsive web apps backed by scalable databases like PostgreSQL. In my recent project, I built a real-time web platform where I redesigned our database indexing, which cut query response times by over 35% during peak user activity. What really drives me as an engineer is taking complex, ambiguous problems and turning them into clean, reliable software that users genuinely love using.`;
+  // 2. Self Introduction & Background (Name -> Education -> Skills -> Project & Impact -> Motivation)
+  if (qLower.includes("tell me about yourself") || qLower.includes("background in software") || qLower.includes("what drives you") || qLower.includes("your background")) {
+    return `Hi, thanks for having me today! My name is ${candName}. I am ${candEdu.startsWith("pursuing") || candEdu.startsWith("currently") ? candEdu : `holding a degree in Computer Science & Engineering`} and specialize as a ${candRole}, working primarily with TypeScript, React, Next.js, Node.js, and PostgreSQL. Over the past few years, I have focused on building responsive, high-performance web applications. In my recent work on ${candProject}, I engineered real-time features and restructured database indexing, which cut query response times by over 35% under peak traffic. What really drives me as an engineer is taking complex, ambiguous problems and turning them into clean, reliable software that users love, and I'm super excited about the opportunity to contribute to your engineering team.`;
   }
 
   // 3. Motivation for Role & Challenges
