@@ -91,17 +91,22 @@ export function StrengthsWeaknessesCard({
                       </div>
                     </div>
 
-                    {/* Score & Threshold Badge (50+ Good / Less than 50 Weak) + Chevron */}
+                    {/* Score & Threshold Badge (50+ Good / 1-49 Weak / 0 Skipped) + Chevron */}
                     <div className="flex items-center gap-3 shrink-0">
-                      {isGood ? (
+                      {round.score >= 50 ? (
                         <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 font-bold text-xs shadow-xs">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                           <span>Score: {round.score}/100 • Good (Strong Performance)</span>
                         </div>
-                      ) : (
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-950/80 border border-rose-500/50 text-rose-300 font-bold text-xs shadow-xs animate-pulse">
+                      ) : round.score > 0 ? (
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-950/80 border border-rose-500/50 text-rose-300 font-bold text-xs shadow-xs">
                           <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
-                          <span>Score: {round.score}/100 • Weak (Needs Improvement)</span>
+                          <span>Score: {round.score}/100 • Needs Improvement</span>
+                        </div>
+                      ) : (
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-950/50 border border-rose-800/60 text-rose-300/80 font-bold text-xs shadow-xs">
+                          <ShieldAlert className="w-3.5 h-3.5 text-rose-400" />
+                          <span>Score: 0/100 • Skipped / Not Attempted</span>
                         </div>
                       )}
 
@@ -109,6 +114,7 @@ export function StrengthsWeaknessesCard({
                         {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                       </div>
                     </div>
+
                   </div>
 
                   {/* Expandable Round Content */}

@@ -39,12 +39,15 @@ export default function InterviewResultsPage({
           const json = await res.json();
           setData(json);
 
-          // Trigger Confetti Celebration
-          confetti({
-            particleCount: 80,
-            spread: 70,
-            origin: { y: 0.6 },
-          });
+          // Trigger Confetti Celebration only for passing score
+          if (json.interview?.overallScore >= 50) {
+            confetti({
+              particleCount: 80,
+              spread: 70,
+              origin: { y: 0.6 },
+            });
+          }
+
         }
       } catch (err) {
         console.error(err);
@@ -121,8 +124,22 @@ export default function InterviewResultsPage({
             </span>
             <span className="text-sm font-bold text-slate-400">/ 100</span>
           </div>
-          <span className="text-[11px] font-bold text-emerald-300 bg-emerald-950/80 border border-emerald-700/60 px-2.5 py-0.5 rounded-full mt-2">
-            Top 15% Candidate Performance
+          <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full mt-2 border ${
+            interview.overallScore >= 80
+              ? "text-emerald-300 bg-emerald-950/80 border-emerald-700/60"
+              : interview.overallScore >= 60
+              ? "text-indigo-300 bg-indigo-950/80 border-indigo-700/60"
+              : interview.overallScore > 0
+              ? "text-amber-300 bg-amber-950/80 border-amber-700/60"
+              : "text-rose-300 bg-rose-950/80 border-rose-700/60"
+          }`}>
+            {interview.overallScore >= 80
+              ? "Top 15% Candidate Performance"
+              : interview.overallScore >= 60
+              ? "Solid Passing Performance"
+              : interview.overallScore > 0
+              ? "Needs Improvement • Practice Again"
+              : "Interview Ended Early / Rounds Skipped"}
           </span>
         </div>
 
@@ -131,6 +148,7 @@ export default function InterviewResultsPage({
             {interview.summaryFeedback}
           </p>
         )}
+
       </div>
 
       {/* 7-Dimensional Breakdown Cards */}

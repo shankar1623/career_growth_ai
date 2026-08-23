@@ -48,11 +48,12 @@ export function getRecommendedModelAnswer(
 ): string {
   const qLower = (questionText || "").toLowerCase();
 
-  const candName = context?.name || "Kancharla Sai Shankar";
-  const candEdu = context?.education || "currently pursuing my M.Sc. in AI & ML at VIT Vellore, having completed my B.Sc. in Computer Science from Sir CR Reddy College";
+  const candName = context?.name || "Candidate";
+  const candEdu = context?.education || "holding a degree in Computer Science & Engineering";
   const candRole = context?.role || "Software Developer";
-  const candProject = context?.projects || "a web-based Library Management System using Flask and MySQL with complete CRUD operations";
-  const skillsPhrase = context?.skills || "Python, Django, Flask, SQL, HTML, CSS, Tailwind CSS, and Bootstrap";
+  const candProject = context?.projects || "a full-stack web application with complete CRUD operations and database connectivity";
+  const skillsPhrase = context?.skills || "JavaScript, TypeScript, React, Node.js, SQL, and Git";
+
 
   // 1. Five Years / Career Goals
   if (qLower.includes("three to five years") || qLower.includes("5 years") || qLower.includes("where do you see yourself") || qLower.includes("career aspiration")) {

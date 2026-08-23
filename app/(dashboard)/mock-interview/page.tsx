@@ -44,8 +44,10 @@ export default function MockInterviewSetupPage() {
   const [resumes, setResumes] = useState<SavedResume[]>([]);
   const [selectedResumeId, setSelectedResumeId] = useState<string>("");
   const [isLoadingResumes, setIsLoadingResumes] = useState(true);
+  const [proceedWithoutResume, setProceedWithoutResume] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
 
   useEffect(() => {
     async function loadResumes() {
@@ -67,6 +69,13 @@ export default function MockInterviewSetupPage() {
 
   const handleStartInterview = async () => {
     setErrorMessage(null);
+
+    // Validate resume presence
+    if (resumes.length === 0 && !proceedWithoutResume) {
+      setErrorMessage("Please upload your resume in Resume Analyzer so the AI interviewer can personalize Round 2 to your actual projects, or check 'Proceed with standard questions' below.");
+      return;
+    }
+
     setIsCreating(true);
     const finalRole = isCustomRole ? (customRoleInput.trim() || "Software Engineer") : role;
 
@@ -95,6 +104,7 @@ export default function MockInterviewSetupPage() {
       setIsCreating(false);
     }
   };
+
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-8">
@@ -247,13 +257,42 @@ export default function MockInterviewSetupPage() {
               ))}
             </select>
           ) : (
-            <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 rounded-xl text-xs text-amber-800 dark:text-amber-300 flex items-center justify-between">
-              <span>No resume uploaded yet. Default software engineering questions will be used.</span>
-              <Link href="/resume-analyzer" className="font-bold underline text-indigo-700 dark:text-indigo-400 ml-2">
-                Upload Resume First
-              </Link>
+            <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/60 rounded-2xl space-y-3">
+              <div className="flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <div className="text-xs space-y-1">
+                  <strong className="text-amber-900 dark:text-amber-200 font-bold block">
+                    Upload Resume for Personalized Questions (Recommended)
+                  </strong>
+                  <p className="text-amber-800/90 dark:text-amber-300/90 leading-relaxed">
+                    No resume is uploaded yet in your account. Uploading your resume allows the AI interviewer to analyze your actual projects and background in Round 2.
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1 border-t border-amber-200/60 dark:border-amber-900/40">
+                <Link
+                  href="/resume-analyzer"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition-colors shadow-xs shrink-0"
+                >
+                  <UploadCloud className="w-3.5 h-3.5" />
+                  <span>Upload Resume in Resume Analyzer</span>
+                </Link>
+                <label className="flex items-center gap-2 text-xs font-semibold text-amber-900 dark:text-amber-200 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={proceedWithoutResume}
+                    onChange={(e) => {
+                      setProceedWithoutResume(e.target.checked);
+                      if (e.target.checked) setErrorMessage(null);
+                    }}
+                    className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-amber-300 dark:border-amber-700 bg-white dark:bg-slate-800"
+                  />
+                  <span>Proceed with standard role questions</span>
+                </label>
+              </div>
             </div>
           )}
+
         </div>
 
         {/* 5-Round Roadmap Summary */}

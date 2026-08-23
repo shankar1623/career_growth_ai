@@ -30,24 +30,35 @@ export async function POST(req: NextRequest, context: { params: Promise<{ id: st
       return NextResponse.json({ error: "Interview not found" }, { status: 404 });
     }
 
-    // Collect scores per round
-    const roundScores = interview.rounds.map((r) => {
-      let rScore = r.score;
-      const answers = r.questions.flatMap((q) => q.answers);
-      if (answers.length > 0) {
-        rScore = Math.round(answers.reduce((a, c) => a + c.score, 0) / answers.length);
-      } else if (r.codingSubmissions.length > 0) {
-        rScore = r.codingSubmissions[0].correctnessScore;
-      } else {
-        rScore = 0; // Skipped round = 0
-      }
+    // Collect scores per round and persist each round status & score in DB
+    const roundScores = await Promise.all(
+      interview.rounds.map(async (r) => {
+        let rScore = 0;
+        const answers = r.questions.flatMap((q) => q.answers);
+        if (answers.length > 0) {
+          rScore = Math.round(answers.reduce((a, c) => a + c.score, 0) / answers.length);
+        } else if (r.codingSubmissions.length > 0) {
+          rScore = r.codingSubmissions[0].correctnessScore;
+        } else {
+          rScore = 0; // Skipped / Unattempted round = 0
+        }
 
-      return {
-        round: r.roundNumber,
-        score: rScore,
-        type: r.roundType,
-      };
-    });
+        await prisma.interviewRound.update({
+          where: { id: r.id },
+          data: {
+            score: rScore,
+            status: answers.length > 0 || r.codingSubmissions.length > 0 ? "COMPLETED" : "SKIPPED",
+          },
+        });
+
+        return {
+          round: r.roundNumber,
+          score: rScore,
+          type: r.roundType,
+        };
+      })
+    );
+
 
     // Generate comprehensive evaluation report
     const finalReport = await generateFinalInterviewReport(roundScores);

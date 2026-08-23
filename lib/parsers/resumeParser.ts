@@ -217,12 +217,13 @@ export function extractResumeMetadata(rawText: string, fileName?: string) {
   }
 
   return {
-    extractedName: extractedName || "Kancharla Sai Shankar",
-    extractedEducation: educationStatement,
-    cleanSkillsList,
-    workExperienceStatement: workExperienceStatement || "Full Stack Developer Intern at Ramana Software, where I developed a responsive Career Portal using Python, Django, HTML, and Tailwind CSS",
-    projectStatement: projectStatement || "a web-based Library Management System using Flask and MySQL with CRUD operations",
-    extractedProjects: projectStatement || "Career Portal with Django & Library Management System with Flask",
+    extractedName: extractedName || "",
+    extractedEducation: educationStatement || "a background in Computer Science & Engineering",
+    cleanSkillsList: cleanSkillsList || "Python, Django, Flask, SQL, HTML5, CSS3, and Tailwind CSS",
+    workExperienceStatement: workExperienceStatement || "",
+    projectStatement: projectStatement || "",
+    extractedProjects: projectStatement || "",
     sections,
   };
 }
+
