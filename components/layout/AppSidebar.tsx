@@ -19,12 +19,12 @@ import { BrandLogo } from "@/components/common/BrandLogo";
 
 const NAV_ITEMS = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, badge: null },
-  { name: "Resume Analyzer", href: "/resume-analyzer", icon: FileText, badge: "ATS" },
+  { name: "Resume Analyzer", href: "/resume-analyzer", icon: FileText, badge: null },
   { name: "Job Match", href: "/job-match", icon: Target, badge: null },
-  { name: "Mock Interview", href: "/mock-interview", icon: Video, badge: "LIVE" },
+  { name: "Mock Interview", href: "/mock-interview", icon: Video, badge: null },
   { name: "Feedback", href: "/feedback", icon: MessageSquareCheck, badge: null },
-  { name: "Learning Roadmap", href: "/roadmap", icon: Compass, badge: "4-Wk" },
-  { name: "History", href: "/history", icon: History, badge: "ALL" },
+  { name: "Learning Roadmap", href: "/roadmap", icon: Compass, badge: null },
+  { name: "History", href: "/history", icon: History, badge: null },
   { name: "Profile", href: "/profile", icon: User, badge: null },
 ];
 
